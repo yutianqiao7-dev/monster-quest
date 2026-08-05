@@ -133,8 +133,10 @@ function fit(){
   if(aw<40||ah<40) return;
   const cw=Math.floor(Math.min(aw, ah*W/H)), ch=Math.round(cw*H/W);
   const dpr=Math.min(window.devicePixelRatio||1,3);
-  S=Math.max(2,Math.min(8,Math.ceil(cw*dpr/W)));
-  disp.width=W*S; disp.height=H*S;
+  const s=Math.max(2,Math.min(8,Math.ceil(cw*dpr/W)));
+  /* 変化が無ければ何もしない。loop から定期的に呼ばれる前提 */
+  if(s===S && disp.width===W*S && disp.style.width===cw+'px') return;
+  S=s; disp.width=W*S; disp.height=H*S;
   disp.style.width=cw+'px'; disp.style.height=ch+'px';
   d.imageSmoothingEnabled=false; d.textBaseline='top';
 }
@@ -337,12 +339,18 @@ const SP={
     lv:[[1,'tackle'],[1,'harden'],[6,'pin'],[10,'toxic'],[14,'bite']]},
   kabutoga:{n:'カブトーガ',t:'むし',b:[62,85,70,45],x:160,cr:100,c:['#1e2410','#7d9a34','#4c621c','#b6d066','#d8b040','#ffffff'],
     lv:[[1,'tackle'],[1,'harden'],[10,'bite'],[16,'sharpen'],[22,'pin'],[28,'slam'],[34,'air']]},
-  iwagoro:{n:'イワゴロ',t:'いわ',b:[55,70,85,25],x:90,cr:130,c:['#2c2a26','#98928a','#63605c','#c8c2b8','#7a6a52','#ffffff'],
+  iwagoro:{n:'イワゴロ',t:'いわ',b:[55,70,85,25],x:90,cr:130,ev:['gansekio',24],c:['#2c2a26','#98928a','#63605c','#c8c2b8','#7a6a52','#ffffff'],
     lv:[[1,'tackle'],[1,'harden'],[7,'rock'],[13,'tail'],[19,'blast'],[26,'slam']]},
-  biritto:{n:'ビリット',t:'でんき',b:[40,52,40,75],x:82,cr:150,c:['#3c3410','#f6e05a','#b09a20','#fff8b8','#f08840','#ffffff'],
+  biritto:{n:'ビリット',t:'でんき',b:[40,52,40,75],x:82,cr:150,ev:['elekyu',22],c:['#3c3410','#f6e05a','#b09a20','#fff8b8','#f08840','#ffffff'],
     lv:[[1,'quick'],[1,'growl'],[6,'shock'],[12,'wave'],[18,'slam'],[25,'bolt']]},
-  pukari:{n:'プカリ',t:'みず',b:[58,48,62,38],x:75,cr:160,c:['#1e2a4e','#8fb6ee','#5b7cbc','#cfe2ff','#f0a0d0','#ffffff'],
+  elekyu:{n:'エレキュー',t:'でんき',b:[60,78,55,95],x:165,cr:60,c:['#3a2f0c','#ffd83c','#c09a10','#fff4a0','#f07030','#ffffff'],
+    lv:[[1,'quick'],[1,'shock'],[12,'wave'],[18,'slam'],[25,'bolt'],[33,'air']]},
+  pukari:{n:'プカリ',t:'みず',b:[58,48,62,38],x:75,cr:160,ev:['uzushio',24],c:['#1e2a4e','#8fb6ee','#5b7cbc','#cfe2ff','#f0a0d0','#ffffff'],
     lv:[[1,'tackle'],[1,'harden'],[8,'wgun'],[14,'wave'],[20,'bubble'],[27,'hydro']]},
+  uzushio:{n:'ウズシオ',t:'みず',b:[78,65,82,50],x:168,cr:70,c:['#122040','#6fa0e8','#3f6cb0','#b0d4ff','#f090c8','#ffffff'],
+    lv:[[1,'tackle'],[1,'harden'],[8,'wgun'],[14,'wave'],[20,'bubble'],[27,'hydro'],[33,'slam']]},
+  gansekio:{n:'ガンセキオー',t:'いわ',b:[75,95,110,30],x:178,cr:60,c:['#241f1a','#8a8278','#5a544e','#bab2a6','#6a5a42','#ffffff'],
+    lv:[[1,'tackle'],[1,'harden'],[7,'rock'],[13,'tail'],[19,'blast'],[26,'slam'],[34,'sharpen']]},
   honomera:{n:'ホノメラ',t:'ほのお',b:[48,68,45,70],x:95,cr:110,c:['#4a1a10','#ff9a3c','#c85a18','#ffd48a','#ffe860','#ffffff'],
     lv:[[1,'quick'],[1,'ember'],[9,'growl'],[15,'fang'],[22,'sharpen'],[29,'flame']]}
 };
@@ -631,6 +639,57 @@ pukari:[
 "....4.4..4.4....",
 "....4.4..4.4....",
 "................"],
+elekyu:[
+"..0........0....",
+"..040......040..",
+".04400....00440.",
+"...0000000000...",
+"..011111111110..",
+".01111111111110.",
+"0116611111166110",
+"0116711111167110",
+"0114411111144110",
+"0111111771111110",
+"0111333333331110",
+".01133333333110.",
+"..011111111110..",
+"...0000000000...",
+"...0110....0110.",
+"................"],
+uzushio:[
+"................",
+"....00000000....",
+"..001111111100..",
+".01111111111110.",
+"0111111111111110",
+"0116611111166110",
+"0116711111167110",
+"0111111111111110",
+"0111333333331110",
+".01111111111110.",
+"..000000000000..",
+"....44.44.44....",
+"....44.44.44....",
+"....4..44..4....",
+"....4...4...4...",
+"................"],
+gansekio:[
+"................",
+"....00....00....",
+"...0440..0440...",
+"..001111111100..",
+".01111111111110.",
+"0111111111111110",
+"0116611111166110",
+"0116711111167110",
+"0111111111111110",
+"0113333113333110",
+"0111331111331110",
+"0111111111111110",
+"0111111111111110",
+".01111111111110.",
+"..000000000000..",
+"..00........00.."],
 honomera:[
 ".......4........",
 "......44........",
@@ -744,7 +803,15 @@ function drawSpr(cv,x,y,sc,flip,ctx){
   g.restore();
 }
 /* ============================ マップ ============================ */
-const SOLID='TWHDS#';
+const SOLID='TWHDS#_';
+/* ジムバッジ。順にクリアしていくと次のエリアの門が開く */
+const BADGES=[
+  {id:'midori',n:'みどりバッジ',town:'セイリュウシティ',leader:'ソウマ',t:'むし'},
+  {id:'shiokaze',n:'しおかぜバッジ',town:'ヒナタ港町',leader:'ナミ',t:'みず'},
+  {id:'ikazuchi',n:'いかずちバッジ',town:'テンボウ台',leader:'ライガ',t:'でんき'}
+];
+const hasBadge=id=>!!(G.badges&&G.badges[id]);
+const badgeCount=()=>G.badges?Object.keys(G.badges).length:0;
 const MAPS={
 town:{name:'ハジマリの町',bgm:1,rows:[
 "TTTTTTTTTRRTTTTTTTTT",
@@ -816,12 +883,11 @@ npcs:[
 signs:{'14,17':'かんばん:「きた ↑ トキワのもり / みなみ ↓ ハジマリの町」'},
 enc:{lv:[2,4],list:[['nonezu',28],['chunpi',24],['mushikoro',22],['biritto',10],['iwagoro',8],['pukari',8]]}},
 
-forest:{name:'トキワのもり',bgm:3,rows:[
-"TTTTTTTTTTTTTTTTTTTT",
-"T...,,,,,,,,,,,,...T",
-"T.TT,,,,,,,,,,,,TT.T",
-"T.TT,,,,,,,,,,,,TT.T",
-"T...,,,,,,,,,,,,...T",
+forest:{name:'トキワのもり',rows:[
+"TTTTTTTTTRTTTTTTTTTT",
+"TTTTTTTTTRTTTTTTTTTT",
+"TTTTTTT,,R,,,TTTTTTT",
+"T....,,,,,,,,,,....T",
 "T.TT.,,,,,,,,,,.TT.T",
 "T.TT.,,,,,,,,,,.TT.T",
 "T....,,,,,,,,,,....T",
@@ -834,21 +900,310 @@ forest:{name:'トキワのもり',bgm:3,rows:[
 "T.,,,,,,,,,,,,,,,,.T",
 "T.,,,,,,,,,,,,,,,,.T",
 "T........,,........T",
+"T........,,........T",
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
-warps:[{x:9,y:19,to:'route1',tx:9,ty:1},{x:10,y:19,to:'route1',tx:10,ty:1}],
+warps:[{x:9,y:19,to:'route1',tx:9,ty:1},{x:10,y:19,to:'route1',tx:10,ty:1},
+       {x:9,y:0,to:'route2',tx:9,ty:18}],
 npcs:[
- {x:9,y:3,pal:'rival',dir:'down',nm:'ライバル ケイ',
+ {x:9,y:1,pal:'rival',dir:'down',nm:'ライバル ケイ',hide:'t_forest_9_1',
   trainer:{rival:1,money:1500,
-   pre:['やっと おいついたか!','おれの チームで あいてに なってやる!'],
-   win:['まさか まけるとはな…','だが つぎは かたせてもらう!'],
-   after:['もりの おくは まだまだ ひろい。','おたがい つよく なろうぜ。']}},
- {x:4,y:14,pal:'boy',dir:'right',nm:'たんけんか',
-  say:['もりの おくには つよい ぬしが いるらしい…','きみは じゅんびは できてるか?']}
+   pre:['やっと おいついたか!','このさきは セイリュウシティ。','とおりたければ おれを たおしてからだ!'],
+   win:['まさか まけるとはな…','いいだろう、みちは あけてやる。','おれは さきに ジムへ いく。またな!'],
+   after:['さきに いってるぜ!']}},
+ {x:4,y:13,pal:'boy',dir:'right',nm:'たんけんか',
+  say:['きたの でぐちは ライバルの こぞうが ふさいでる。','たおさないと セイリュウシティへ いけないぞ。']}
 ],
 signs:{},
-enc:{lv:[8,13],list:[['mushikoro',18],['kabutoga',14],['chunpi',14],['sorahane',8],['iwagoro',14],['biritto',12],['honomera',10],['oononezu',10]]}}
+enc:{lv:[8,13],list:[['mushikoro',18],['kabutoga',14],['chunpi',14],['sorahane',8],['iwagoro',14],['biritto',12],['honomera',10],['oononezu',10]]}},
+
+route2:{name:'ルート2',rows:[
+"TTTTTTTTTRRTTTTTTTTT",
+"T........RR........T",
+"T..,,,,..RR..,,,,..T",
+"T..,,,,..RR..,,,,..T",
+"T..,,,,..RR..,,,,..T",
+"T........RR........T",
+"T..TTTT..RR........T",
+"T..TTTT..RR....S...T",
+"T........RR........T",
+"T........RRRRRR....T",
+"T........RR...RR...T",
+"T..,,,,..RR...RR...T",
+"T..,,,,..RR...RR...T",
+"T..,,,,..RR...RR...T",
+"T........RR...RR...T",
+"TWWWW....RR........T",
+"TWWWW....RR........T",
+"T........RR........T",
+"T........RR........T",
+"TTTTTTTTTRRTTTTTTTTT"],
+warps:[{x:9,y:19,to:'forest',tx:9,ty:2},{x:10,y:19,to:'forest',tx:9,ty:2},
+       {x:9,y:0,to:'seiryu',tx:9,ty:17},{x:10,y:0,to:'seiryu',tx:10,ty:17}],
+npcs:[
+ {x:13,y:10,pal:'girl',dir:'left',nm:'たんぱんこぞう',
+  trainer:{party:[['nonezu',11],['chunpi',12],['biritto',12]],money:640,
+   pre:['この さきは セイリュウシティ!','ジムに いくまえに ぼくと しょうぶだ!'],
+   win:['つよい…! ジムリーダーにも かてるかもね。'],
+   after:['ソウマさんは むしタイプの つかいてだよ。','ほのおの わざが あると らくだと おもう!']}},
+ {x:5,y:17,pal:'boy',dir:'right',nm:'りょこうしゃ',
+  say:['きたに いくほど モンスターは つよくなる。','ボールは おおめに もっていくと いいぞ。']}
+],
+signs:{'15,7':'かんばん:「きた ↑ セイリュウシティ / みなみ ↓ トキワのもり」'},
+enc:{lv:[8,12],list:[['nonezu',22],['chunpi',20],['mushikoro',18],['biritto',15],['honomera',10],['kabutoga',10],['pukari',5]]}},
+
+seiryu:{name:'セイリュウシティ',rows:[
+"TTTTTTTTTRTTTTTTTTTT",
+"T........R.........T",
+"T..HHHHH...HHHHH...T",
+"T..HHHHH...HHHHH...T",
+"T..HHDHH...HHDHH...T",
+"T..................T",
+"T..############....T",
+"T..#..........#....T",
+"T..#..........#....T",
+"T..#..........#....T",
+"T..######.#####....T",
+"T........RR.S......T",
+"T.HHHHHHH..........T",
+"T.HHHHHHH..........T",
+"T.HHDHHDH..........T",
+"T........RR........T",
+"T..F.....RR.....F..T",
+"T........RR........T",
+"TTTTTTTTTRRTTTTTTTTT"],
+warps:[{x:9,y:18,to:'route2',tx:9,ty:1},{x:10,y:18,to:'route2',tx:10,ty:1},
+       {x:9,y:0,to:'route3',tx:9,ty:18}],
+npcs:[
+ {x:9,y:7,pal:'shop',dir:'down',nm:'ジムリーダー ソウマ',
+  trainer:{party:[['mushikoro',14],['kabutoga',17]],money:1600,
+   badge:{id:'midori'},
+   pre:['よく きたね。ぼくが セイリュウジムの ソウマだ。','むしタイプの つよさ、みせてあげよう!'],
+   win:['みごとだ。きみの ほうが うわてだった。'],
+   after:['きたの みちは もう とおれるよ。','つぎの まちには みずタイプの ジムがある。']}},
+ {x:6,y:8,pal:'boy',dir:'right',nm:'ジムトレーナー',
+  trainer:{party:[['mushikoro',12],['chunpi',13]],money:480,
+   pre:['ソウマさんに あうには ぼくを たおしてから!'],
+   win:['うう… やるな。'],
+   after:['むしタイプは ほのお・ひこう・いわに よわい。']}},
+ {x:12,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',
+  trainer:{party:[['kabutoga',14]],money:520,
+   pre:['カブトーガの かたさ、しってる?'],
+   win:['そんな…! かたさが たりなかった。'],
+   after:['かたくなる を つかう あいてには','とくこうげきより れんだが きくよ。']}},
+ {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
+ {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
+ {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'midori'},
+  say:['この さきは しゅぎょうの みち。','セイリュウジムの バッジが ないと とおせないよ。'],
+  say2:['みどりバッジ かくにん! どうぞ とおって。']},
+ {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
+  say:['セイリュウシティは むしとりの まち。','もりが ちかいから みんな むしに くわしいの。']}
+],
+signs:{'12,11':'かんばん:「セイリュウジム —— リーダー ソウマ / むしタイプ」'},
+enc:null},
+
+route3:{name:'ルート3',rows:[
+"TTTTTTTTTRRTTTTTTTTT",
+"T........RR........T",
+"T..,,,...RR...,,,..T",
+"T..,,,...RR...,,,..T",
+"T........RR........T",
+"T..####..RR..####..T",
+"T..####..RR..####..T",
+"T........RR........T",
+"T..,,,,,,RR,,,,,,..T",
+"T..,,,,,,RR,,,,,,..T",
+"T........RR........T",
+"T..####..RR..####..T",
+"T..####..RR..####..T",
+"T........RR........T",
+"T..,,,...RR...,,,..T",
+"T..,,,...RR...,,,..T",
+"T........RR....S...T",
+"T........RR........T",
+"T........RR........T",
+"TTTTTTTTTRRTTTTTTTTT"],
+warps:[{x:9,y:19,to:'seiryu',tx:9,ty:1},{x:10,y:19,to:'seiryu',tx:9,ty:1},
+       {x:9,y:0,to:'cave',tx:9,ty:18},{x:10,y:0,to:'cave',tx:9,ty:18}],
+npcs:[
+ {x:8,y:8,pal:'rival',dir:'right',nm:'とざんか',
+  trainer:{party:[['iwagoro',16],['oononezu',17]],money:900,
+   pre:['イワクラどうくつへ いくのか?','なら おれを こえてからだ!'],
+   win:['どうくつの なかは くらいぞ。きをつけろ。'],
+   after:['いわタイプには みずと くさが よくきく。']}},
+ {x:14,y:15,pal:'boy',dir:'left',nm:'ハイカー',
+  say:['きたの どうくつを ぬけると ヒナタ港町だ。','いわタイプが たくさん でるぞ!']}
+],
+signs:{'15,16':'かんばん:「きた ↑ イワクラどうくつ / みなみ ↓ セイリュウシティ」'},
+enc:{lv:[14,18],list:[['oononezu',20],['sorahane',18],['kabutoga',18],['iwagoro',16],['biritto',12],['honomera',10],['pukari',6]]}},
+
+cave:{name:'イワクラどうくつ',rows:[
+"________~~__________",
+"_~~~~~~~~~~~~~~~~~~_",
+"_~~____~~~~~~____~~_",
+"_~~____~~~~~~____~~_",
+"_~~~~~~~~__~~~~~~~~_",
+"_~~~~~~~~__~~~~~~~~_",
+"_~~____~~__~~____~~_",
+"_~~____~~__~~____~~_",
+"_~~~~~~~~__~~~~~~~~_",
+"_~~~~~~~~~~~~~~~~~~_",
+"_~~____~~~~~~____~~_",
+"_~~____~~~~~~____~~_",
+"_~~~~~~~~~~~~~~~~~~_",
+"_~~~~____~~____~~~~_",
+"_~~~~____~~____~~~~_",
+"_~~~~~~~~~~~~~~~~~~_",
+"_~~____~~~~~~____~~_",
+"_~~____~~~~~~____~~_",
+"_~~~~~~~~~~~~~~~~~~_",
+"________~~__________"],
+warps:[{x:8,y:19,to:'route3',tx:9,ty:1},{x:9,y:19,to:'route3',tx:9,ty:1},
+       {x:8,y:0,to:'hinata',tx:9,ty:17},{x:9,y:0,to:'hinata',tx:9,ty:17}],
+npcs:[
+ {x:16,y:9,pal:'boy',dir:'left',nm:'たんこうふ',
+  trainer:{party:[['iwagoro',19],['gansekio',21]],money:1300,
+   pre:['この どうくつは おれの にわだ!','よそものには まけられん!'],
+   win:['ぬしの ガンセキオーが やられるとはな…'],
+   after:['ガンセキオーは イワゴロが Lv24で しんかする。','そだてて みるといい。']}},
+ {x:3,y:12,pal:'girl',dir:'right',nm:'たんけんか',
+  say:['ここは ふるい いわの さんち。','おくには ガンセキオーも すんでいるわ。']}
+],
+signs:{},
+encTile:'~',encRate:0.09,
+enc:{lv:[16,21],list:[['iwagoro',30],['gansekio',8],['mushikoro',12],['oononezu',20],['biritto',15],['kabutoga',15]]}},
+
+hinata:{name:'ヒナタ港町',rows:[
+"TTTTTTTTTRTTTTTTTTTT",
+"T........R.........T",
+"T..HHHHH...HHHHH...T",
+"T..HHHHH...HHHHH...T",
+"T..HHDHH...HHDHH...T",
+"T..................T",
+"T....##########....T",
+"T....#........#....T",
+"T....#........#....T",
+"T....#####.####....T",
+"T........RR.S......T",
+"T........RR........T",
+"TWWWWW...RR...WWWWWT",
+"TWWWWW...RR...WWWWWT",
+"TWWWWW...RR...WWWWWT",
+"T........RR........T",
+"T..F.....RR.....F..T",
+"T........RR........T",
+"TTTTTTTTTRRTTTTTTTTT"],
+warps:[{x:9,y:18,to:'cave',tx:8,ty:1},{x:10,y:18,to:'cave',tx:8,ty:1},
+       {x:9,y:0,to:'route4',tx:9,ty:18}],
+npcs:[
+ {x:10,y:7,pal:'nurse',dir:'down',nm:'ジムリーダー ナミ',
+  trainer:{party:[['pukari',21],['uzushio',24]],money:2600,
+   badge:{id:'shiokaze'},
+   pre:['ヒナタジムへ ようこそ。わたしが ナミ。','みなとの みずは そう あまくないわよ!'],
+   win:['いい しおかぜが ふいたわね。あなたの かちよ。'],
+   after:['みなみの みちは もう とおれるわ。','つぎは たかだいの でんきジムね。']}},
+ {x:7,y:8,pal:'boy',dir:'right',nm:'ジムトレーナー',
+  trainer:{party:[['pukari',19],['shizuku',20]],money:760,
+   pre:['ナミさんに あうには ぼくが あいてだ!'],
+   win:['まいった。みずタイプも かんぺきじゃないな。'],
+   after:['みずタイプには でんきと くさが よくきく。']}},
+ {x:12,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',
+  trainer:{party:[['aquare',22]],money:820,
+   pre:['アクアーレの まもりは かたいわよ!'],
+   win:['ぼうぎょだけじゃ かてないのね…'],
+   after:['ぼうぎょが たかい あいてには','とくせいより タイプあいしょうを かんがえて!']}},
+ {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
+ {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
+ {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'shiokaze'},
+  say:['この さきは テンボウ台への みち。','ヒナタジムの バッジが ないと とおせないよ。'],
+  say2:['しおかぜバッジ かくにん! いってらっしゃい。']},
+ {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
+  say:['ヒナタ港町は うみに ひらけた まち。','プカリが Lv24で ウズシオに しんかするのよ。']}
+],
+signs:{'12,10':'かんばん:「ヒナタジム —— リーダー ナミ / みずタイプ」'},
+enc:null},
+
+route4:{name:'ルート4',rows:[
+"TTTTTTTTTRRTTTTTTTTT",
+"T........RR........T",
+"T..,,,,..RR..,,,,..T",
+"T..,,,,..RR..,,,,..T",
+"T..,,,,..RR..,,,,..T",
+"T........RR........T",
+"T..#####.RR.#####..T",
+"T..#####.RR.#####..T",
+"T........RR........T",
+"T..,,,,,,RR,,,,,,..T",
+"T..,,,,,,RR,,,,,,..T",
+"T........RR........T",
+"T..#####.RR.#####..T",
+"T..#####.RR.#####..T",
+"T........RR........T",
+"T..,,,,..RR..,,,,..T",
+"T..,,,,..RR..,,,,..T",
+"T........RR....S...T",
+"T........RR........T",
+"TTTTTTTTTRRTTTTTTTTT"],
+warps:[{x:9,y:19,to:'hinata',tx:9,ty:1},{x:10,y:19,to:'hinata',tx:9,ty:1},
+       {x:9,y:0,to:'tenbou',tx:9,ty:17},{x:10,y:0,to:'tenbou',tx:10,ty:17}],
+npcs:[
+ {x:12,y:9,pal:'rival',dir:'left',nm:'ライバル ケイ',
+  trainer:{rival2:1,money:3000,
+   pre:['また あったな! だいぶ そだてたようだが…','おれだって とまっちゃいない!','こんどこそ かたせてもらう!'],
+   win:['…また まけたか。','だが おれは あきらめないぜ。テンボウ台で まってる!'],
+   after:['ライガさんは でんきの プロだ。','じめんが ないぶん、いわタイプが たよりになるぞ。']}},
+ {x:6,y:16,pal:'boy',dir:'right',nm:'キャンパー',
+  say:['たかだいは かぜが つよくて でんきタイプの すみか。','ソラハネや エレキューが よく でるよ。']}
+],
+signs:{'15,17':'かんばん:「きた ↑ テンボウ台 / みなみ ↓ ヒナタ港町」'},
+enc:{lv:[22,27],list:[['sorahane',20],['oononezu',18],['gansekio',15],['elekyu',12],['kabutoga',15],['honomera',12],['uzushio',8]]}},
+
+tenbou:{name:'テンボウ台',rows:[
+"TTTTTTTTTTTTTTTTTTTT",
+"T..................T",
+"T..HHHHH...HHHHH...T",
+"T..HHHHH...HHHHH...T",
+"T..HHDHH...HHDHH...T",
+"T..................T",
+"T...###########....T",
+"T...#.........#....T",
+"T...#.........#....T",
+"T...#.........#....T",
+"T...#####.#####....T",
+"T........RR.S......T",
+"T..HHHHH...........T",
+"T..HHHHH...........T",
+"T..HHDHH...........T",
+"T........RR........T",
+"T..F.....RR.....F..T",
+"T........RR........T",
+"TTTTTTTTTRRTTTTTTTTT"],
+warps:[{x:9,y:18,to:'route4',tx:9,ty:1},{x:10,y:18,to:'route4',tx:10,ty:1}],
+npcs:[
+ {x:9,y:7,pal:'rival',dir:'down',nm:'ジムリーダー ライガ',
+  trainer:{party:[['biritto',26],['sorahane',27],['elekyu',29]],money:4200,
+   badge:{id:'ikazuchi'},
+   pre:['ここまで きたか。おれが ライガだ。','テンボウ台の かみなりを うけてみろ!'],
+   win:['…みごとだ。おまえの かちだ。'],
+   after:['3つの バッジ、たいしたものだ。','この さきの みちは まだ こうじちゅうでな。','いつか かならず ひらく。それまで まっていろ。']}},
+ {x:6,y:8,pal:'boy',dir:'right',nm:'ジムトレーナー',
+  trainer:{party:[['biritto',24],['chunpi',24]],money:1100,
+   pre:['ライガさんは おくだ。まず おれを たおせ!'],
+   win:['はやい… スピードで まけた。'],
+   after:['でんきタイプは くさに よわい。']}},
+ {x:12,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',
+  trainer:{party:[['sorahane',25],['elekyu',26]],money:1250,
+   pre:['そらと かみなり、どっちも あいてよ!'],
+   win:['そんな…! かんぜんに よまれてた。'],
+   after:['ひこう＋でんきは いわタイプが てんてき。']}},
+ {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
+ {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
+ {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
+  say:['ここは たいりくで いちばん たかい まち。','はれた ひは うみまで みえるのよ。']}
+],
+signs:{'12,11':'かんばん:「テンボウジム —— リーダー ライガ / でんきタイプ」'},
+enc:null}
 };
 
 /* ============================ タイル描画 ============================ */
@@ -911,6 +1266,18 @@ function drawTile(ch,px_,py,wx,wy){
       g.fillStyle='#49b055'; g.fillRect(px_+4+(o>0?1:0),py+3,4,3);
       g.fillStyle='#17462180'; g.fillRect(px_+2,py+9,12,2);
       break;}
+    case '_':                                        /* 洞窟の岩壁 */
+      g.fillStyle='#3a3038'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#4c4048'; g.fillRect(px_+1,py+1,14,10);
+      g.fillStyle='#5e5058'; g.fillRect(px_+2,py+2,7,4);
+      g.fillStyle='#241d24'; g.fillRect(px_,py+12,16,4); g.fillRect(px_+9,py+4,4,5);
+      break;
+    case '~':                                        /* 洞窟の床 */
+      g.fillStyle='#6a5c58'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#7a6a64'; for(let i=0;i<4;i++){ const r=hsh(wx,wy,i);
+        g.fillRect(px_+Math.floor(r*14),py+Math.floor(hsh(wx,wy,i+5)*14),2,1); }
+      g.fillStyle='#584c48'; if(hsh(wx,wy,9)>0.7) g.fillRect(px_+5,py+8,4,2);
+      break;
     case ',':{
       g.fillStyle='#3f8a3a'; g.fillRect(px_,py,16,16);
       g.fillStyle='#2f6e2c'; g.fillRect(px_,py+8,16,8);
@@ -943,11 +1310,21 @@ const SHOPLIST=['ball','gball','potion','spotion','full','revive'];
 let G=null;
 function newGame(){
   G={map:'town',x:9,y:15,dir:'up',party:[],box:[],
-     bag:{ball:5,potion:3},money:1500,dex:{},flags:{},steps:0,play:0};
+     bag:{ball:5,potion:3},money:1500,dex:{},flags:{},badges:{},steps:0,play:0};
 }
 const SAVEKEY='monsterquest_v1';
 function save(){ try{ localStorage.setItem(SAVEKEY,JSON.stringify(G)); return true; }catch(e){ return false; } }
-function load(){ try{ const s=localStorage.getItem(SAVEKEY); if(!s) return false; G=JSON.parse(s); return true; }catch(e){ return false; } }
+function load(){
+  try{
+    const s=localStorage.getItem(SAVEKEY); if(!s) return false;
+    G=JSON.parse(s);
+    /* 旧セーブとの互換: 後から足したフィールドを補う */
+    if(!G.badges) G.badges={};
+    if(!G.box) G.box=[];
+    if(!MAPS[G.map]){ G.map='town'; G.x=9; G.y=15; }
+    return true;
+  }catch(e){ return false; }
+}
 function hasSave(){ try{ return !!localStorage.getItem(SAVEKEY); }catch(e){ return false; } }
 function seen(id){ if(!G.dex[id]) G.dex[id]=1; }
 function caught(id){ G.dex[id]=2; }
@@ -960,7 +1337,14 @@ function tileAt(mp,x,y){
   const r=mp.rows; if(y<0||y>=r.length||x<0||x>=r[0].length) return 'T';
   return r[y][x];
 }
-function npcAt(mp,x,y){ return (mp.npcs||[]).find(n=>n.x===x&&n.y===y&&!(n.gone)); }
+/* 門番はバッジを見せると脇へどく。倒したトレーナーは hide フラグで消える */
+const npcOpen=n=>!!(n.gate&&hasBadge(n.gate.badge));
+const npcGone=n=>!!(n.hide&&G.flags[n.hide]);
+function npcXY(n){ return (npcOpen(n)&&n.open)?[n.x+n.open[0],n.y+n.open[1]]:[n.x,n.y]; }
+function npcAt(mp,x,y){
+  return (mp.npcs||[]).find(n=>{ if(npcGone(n)) return false;
+    const q=npcXY(n); return q[0]===x&&q[1]===y; });
+}
 function blocked(mp,x,y){ return SOLID.includes(tileAt(mp,x,y)) || !!npcAt(mp,x,y); }
 const DIRV={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 
@@ -987,8 +1371,8 @@ function onStep(){
   const mp=M();
   const w=(mp.warps||[]).find(w=>w.x===G.x&&w.y===G.y);
   if(w){ doWarp(w); return; }
-  if(tileAt(mp,G.x,G.y)===','&&mp.enc&&alive().length){
-    if(Math.random()<0.13) startWild(mp);
+  if(tileAt(mp,G.x,G.y)===(mp.encTile||',')&&mp.enc&&alive().length){
+    if(Math.random()<(mp.encRate||0.13)) startWild(mp);
   }
 }
 async function doWarp(w){
@@ -1037,22 +1421,33 @@ async function talk(n){
     ui.busy=false; return;
   }
   if(n.shop){ await shop(n); ui.busy=false; return; }
+  if(n.gate){
+    for(const l of (npcOpen(n)? (n.say2||['どうぞ とおって。']) : n.say)) await say(l,{name:n.nm});
+    ui.busy=false; return;
+  }
   if(n.trainer){
     const done=G.flags['t_'+G.map+'_'+n.x+'_'+n.y];
     const tr=n.trainer;
     if(done){ for(const l of tr.after) await say(l,{name:n.nm}); ui.busy=false; return; }
     for(const l of tr.pre) await say(l,{name:n.nm});
     ui.busy=false;
-    const party=(tr.rival? rivalParty() : tr.party).map(([id,lv])=>mk(id,lv));
-    battle({trainer:{name:n.nm,party,money:tr.money,win:tr.win,key:'t_'+G.map+'_'+n.x+'_'+n.y}});
+    const spec=tr.rival?rivalParty(1):tr.rival2?rivalParty(2):tr.party;
+    const party=spec.map(([id,lv])=>mk(id,lv));
+    battle({trainer:{name:n.nm,party,money:tr.money,win:tr.win,badge:tr.badge,
+                     key:'t_'+G.map+'_'+n.x+'_'+n.y}});
     return;
   }
   for(const l of (n.say||['…'])) await say(l,{name:n.nm});
   ui.busy=false;
 }
-function rivalParty(){
+/* ライバルは こちらの御三家に有利なタイプを持つ */
+function rivalParty(stage){
   const s=G.flags.starter||'mokuri';
   const counter={mokuri:'pochika',pochika:'shizuku',shizuku:'mokuri'}[s];
+  if(stage===2){
+    const evo={mokuri:'jukario',pochika:'burnix',shizuku:'aquare'}[counter];
+    return [['oononezu',24],['sorahane',25],['gansekio',25],[evo,27]];
+  }
   return [['nonezu',12],['chunpi',13],[counter,15]];
 }
 
@@ -1069,12 +1464,14 @@ function drawField(){
   for(let y=s0;y<=s1;y++) for(let x=t0;x<=t1;x++)
     drawTile(tileAt(mp,x,y),x*16-cam.x,y*16-cam.y,x,y);
   const ents=[];
-  for(const n of (mp.npcs||[])){ if(n.gone) continue;
-    ents.push({y:n.y*16,draw:()=>{
-      drawSpr(heroSpr(n.pal,n.dir),n.x*16-cam.x,n.y*16-cam.y-2,1,n.dir==='left');
+  for(const n of (mp.npcs||[])){
+    if(npcGone(n)) continue;
+    const q=npcXY(n), nx=q[0]*16, ny=q[1]*16;
+    ents.push({y:ny,draw:()=>{
+      drawSpr(heroSpr(n.pal,n.dir),nx-cam.x,ny-cam.y-2,1,n.dir==='left');
       if(n.trainer && !G.flags['t_'+G.map+'_'+n.x+'_'+n.y]){
         const b=Math.sin(tick/9)*1.5;
-        p.fillStyle='#fff'; p.fillRect(n.x*16-cam.x+7,n.y*16-cam.y-12+b,2,5); p.fillRect(n.x*16-cam.x+7,n.y*16-cam.y-6+b,2,2);
+        p.fillStyle='#fff'; p.fillRect(nx-cam.x+7,ny-cam.y-12+b,2,5); p.fillRect(nx-cam.x+7,ny-cam.y-6+b,2,2);
       }
     }});
   }
@@ -1327,7 +1724,12 @@ async function battle(o){
           await say('しょうきんとして '+mn+'えんを てにいれた!');
           for(const l of o.trainer.win) await say(l,{name:o.trainer.name});
           G.flags[o.trainer.key]=1;
-          if(o.trainer.key.startsWith('t_forest')) G.flags.cleared=1;
+          if(o.trainer.badge && !hasBadge(o.trainer.badge.id)){
+            const bd=BADGES.find(b=>b.id===o.trainer.badge.id);
+            G.badges[bd.id]=1; sfx('catch'); ui.flashScreen=20;
+            await say(bd.n+'を てにいれた!');
+            await say('バッジは メニューの「バッジ」で かくにんできる。');
+          }
         } else {
           const mn=bt.foe.lv*9+ri(5,30); G.money+=mn;
           await say('おかね '+mn+'えんを ひろった!');
@@ -1356,11 +1758,13 @@ async function battle(o){
     await say('モンスターたちは かいふく した!');
     ui.busy=false;
   }
-  if(result==='win'&&G.flags.cleared&&!G.flags.ending){
+  if(result==='win'&&badgeCount()>=BADGES.length&&!G.flags.ending){
     G.flags.ending=1; ui.busy=true;
-    await say('—— きみは ライバルを こえた。');
-    await say('もりの おくへ つづく みちは まだ とざされている…');
-    await say('つづきは また こんど! ぼうけんを たのしんで!');
+    await say('—— 3つの バッジが そろった。');
+    await say('ハジマリの町から テンボウ台まで、','ながい みちのりだった。');
+    await say('つかまえた モンスターは '+DEXORDER.filter(i=>G.dex[i]===2).length+'しゅるい。');
+    await say('この さきの みちが ひらくのは、また べつの おはなし。');
+    await say('ぼうけんは まだ つづく!');
     ui.busy=false; save();
   }
 }
@@ -1476,12 +1880,13 @@ async function openMenu(){
   ui.busy=true;
   let run=true;
   while(run){
-    const c=await choose(['モンスター','どうぐ','ずかん','セーブ','とじる'],{x:98,y:8,w:58,cols:1,cancel:true});
-    if(c<0||c===4) break;
+    const c=await choose(['モンスター','どうぐ','バッジ','ずかん','セーブ','とじる'],{x:98,y:8,w:58,cols:1,cancel:true});
+    if(c<0||c===5) break;
     if(c===0) await partyScreen();
     else if(c===1) await bagField();
-    else if(c===2) await dexScreen();
-    else if(c===3){
+    else if(c===2) await badgeScreen();
+    else if(c===3) await dexScreen();
+    else if(c===4){
       await say('ぼうけんの きろくを セーブしますか?',{keep:true});
       const y=await choose(['はい','いいえ'],{x:104,y:66,w:50,cols:1,cancel:true});
       ui.text=null;
@@ -1529,6 +1934,20 @@ async function bagField(){
     if(i<0) continue;
     await applyItem(G.party[i],k);
   }
+}
+async function badgeScreen(){
+  const items=BADGES.map(b=>{
+    const got=hasBadge(b.id);
+    return {t:got?b.n:'？？？バッジ', r:got?'●':'—',
+      col:got?'#fff':'#6f6a90', ty:got?b.t:null};
+  });
+  await choose(items,{x:6,y:26,w:148,cols:1,cancel:true,rowH:14,
+    title:'ジムバッジ  '+badgeCount()+'/'+BADGES.length,
+    onMove:i=>{ const b=BADGES[i];
+      ui.shopDesc=hasBadge(b.id)
+        ? b.town+'の '+b.leader+'を やぶった しょうこ。'
+        : b.town+'の ジムで てにはいる。'; }});
+  ui.shopDesc=null;
 }
 async function dexScreen(){
   const items=DEXORDER.map((id,i)=>{
@@ -1655,7 +2074,11 @@ function drawMenu(){
       fill(sx+2,56,28,8,TY[SP[id].t]); T(SP[id].t,sx+4,56.5,{size:5.5,color:'#1a1626',shadow:false});
     }
   }
-  if(ui.shopDesc){ box(3,118,154,23); T(ui.shopDesc,8,124,{size:8}); }
+  if(ui.shopDesc){
+    box(3,116,154,25);
+    const ls=wrap(ui.shopDesc,142,8);
+    for(let i=0;i<Math.min(ls.length,2);i++) T(ls[i],8,120+i*11,{size:8});
+  }
   if(m.items[m.idx]&&m.items[m.idx].mon&&!m.dex){
     box(112,y-1,42,42); dspr(monSpr(m.items[m.idx].mon),118,y+4,2);
   }
@@ -1788,6 +2211,8 @@ async function titleGo(){
 }
 function loop(){
   tick++;
+  /* 端末やブラウザによってレイアウト確定が遅れるので定期的に採寸し直す */
+  if((tick&31)===0) fit();
   try{
     if(scene==='field') updField();
     draw();
