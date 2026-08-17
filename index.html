@@ -2161,7 +2161,9 @@ async function throwBall(key){
     caught(bt.foe.id);
     const c=bt.foe; resetB(c);
     if(G.party.length<6){ G.party.push(c); await say(c.name+'は なかまに くわわった!'); }
-    else { G.box.push(c); await say('てもちが いっぱい! '+c.name+'は ボックスへ おくられた。'); }
+    else { G.box.push(c);
+      await say('てもちが いっぱい! '+c.name+'は ボックスへ おくられた。');
+      await say('メニューの「ボックス」から つれてこられる。'); }
     bt.ball=null; return true;
   }
   bt.ball=null; bt.anim.fh=0; sfx('no');
@@ -2388,13 +2390,16 @@ async function openMenu(){
   ui.busy=true;
   let run=true;
   while(run){
-    const c=await choose(['モンスター','どうぐ','バッジ','ずかん','セーブ','とじる'],{x:98,y:8,w:58,cols:1,cancel:true});
-    if(c<0||c===5) break;
+    const box=G.box.length?'ボックス('+G.box.length+')':'ボックス';
+    const c=await choose(['モンスター',box,'どうぐ','バッジ','ずかん','セーブ','とじる'],
+      {x:96,y:8,w:60,cols:1,cancel:true});
+    if(c<0||c===6) break;
     if(c===0) await partyScreen();
-    else if(c===1) await bagField();
-    else if(c===2) await badgeScreen();
-    else if(c===3) await dexScreen();
-    else if(c===4){
+    else if(c===1) await boxScreen();
+    else if(c===2) await bagField();
+    else if(c===3) await badgeScreen();
+    else if(c===4) await dexScreen();
+    else if(c===5){
       await say('ぼうけんの きろくを セーブしますか?',{keep:true});
       const y=await choose(['はい','いいえ'],{x:104,y:66,w:50,cols:1,cancel:true});
       ui.text=null;
@@ -2420,13 +2425,32 @@ async function partyScreen(){
     if(c<0||c===3) return;
   }
 }
+/* slot を渡すとその手持ちと入れ替える。省略時は単独のボックス画面として動く */
 async function boxScreen(slot){
-  if(!G.box.length){ await say('ボックスは からっぽだ。'); return; }
-  const items=G.box.map(m=>({t:m.name,r:'Lv'+m.lv,mon:m.id}));
-  const c=await choose(items,{x:6,y:16,w:148,cols:1,title:'ボックス (いれかえる)',cancel:true,max:6});
-  if(c<0) return;
-  const t=G.party[slot]; G.party[slot]=G.box[c]; G.box[c]=t; sfx('ok');
-  await say(G.party[slot].name+'と '+t.name+'を いれかえた!');
+  while(true){
+    if(!G.box.length){ await say('ボックスには だれも あずけられていない。'); return; }
+    const items=G.box.map(m=>({t:m.name,r:'Lv'+m.lv+' '+m.hp+'/'+m.max,mon:m.id}));
+    const c=await choose(items,{x:6,y:16,w:148,cols:1,cancel:true,max:6,
+      title:'ボックス '+G.box.length+'ひき  てもち '+G.party.length+'/6'});
+    if(c<0) return;
+    const pick=G.box[c];
+    if(G.party.length<6){                       /* 空きがあるなら そのまま連れ出す */
+      G.box.splice(c,1); G.party.push(pick); sfx('ok');
+      await say(pick.name+'を てもちに くわえた!');
+      if(slot!==undefined) return;
+      continue;
+    }
+    let s=slot;
+    if(s===undefined){
+      await say('てもちが いっぱいだ。だれと いれかえる?',{keep:true});
+      s=await pickParty({});
+      ui.text=null;
+      if(s<0) continue;
+    }
+    const out=G.party[s]; G.party[s]=pick; G.box[c]=out; sfx('ok');
+    await say(out.name+'を あずけて '+pick.name+'を つれてきた!');
+    if(slot!==undefined) return;
+  }
 }
 async function bagField(){
   while(true){
@@ -2635,7 +2659,9 @@ function drawMenu(){
   const cur=Math.floor(m.idx/cols);
   m.top=m.top||0;
   if(cur<m.top) m.top=cur; if(cur>=m.top+view) m.top=cur-view+1;
-  const w=m.dex?100:m.w, x=m.x, y=m.y;
+  /* スプライトを右に出す一覧は、重ならないよう本体を細くする */
+  const anyMon=!m.dex&&m.items.some(it=>it.mon);
+  const w=m.dex?100:(anyMon?Math.min(m.w,104):m.w), x=m.x, y=m.y;
   const th=m.title?12:0;
   const h=view*rowH+th+(m.pad!==undefined?m.pad:8);
   box(x,y,w,h);
@@ -2680,8 +2706,10 @@ function drawMenu(){
     const ls=wrap(ui.shopDesc,142,8);
     for(let i=0;i<Math.min(ls.length,2);i++) T(ls[i],8,120+i*11,{size:8});
   }
-  if(m.items[m.idx]&&m.items[m.idx].mon&&!m.dex){
-    box(112,y-1,42,42); dspr(monSpr(m.items[m.idx].mon),118,y+4,2);
+  if(anyMon){
+    box(110,y-1,44,44);
+    const it=m.items[m.idx];
+    if(it&&it.mon) dspr(monSpr(it.mon),116,y+5,2);
   }
 }
 function drawDetail(){
