@@ -1002,7 +1002,8 @@ function drawSpr(cv,x,y,sc,flip,ctx){
   g.restore();
 }
 /* ============================ マップ ============================ */
-const SOLID='TWHDS#_L';
+/* w 屋内壁 / A B C スイッチ扉 / G トレーナー扉 / O 押せる岩 */
+const SOLID='TWHDS#_LwABCGO';
 /* ジムバッジ。順にクリアしていくと次のエリアの門が開く */
 const BADGES=[
   {id:'midori',n:'みどりバッジ',town:'セイリュウシティ',leader:'ソウマ',t:'むし'},
@@ -1156,17 +1157,17 @@ signs:{'15,7':'かんばん:「きた ↑ セイリュウシティ / みなみ �
 enc:{lv:[8,12],list:[['nonezu',22],['chunpi',20],['mushikoro',18],['biritto',15],['honomera',10],['kabutoga',10],['pukari',5]]}},
 
 seiryu:{name:'セイリュウシティ',rows:[
-"TTTTTTTTTRTTTTTTTTTT",
-"T........R.........T",
+"TTTTTTTTTTTTTTTTTTTT",
+"T..................T",
 "T..HHHHH...HHHHH...T",
 "T..HHHHH...HHHHH...T",
 "T..HHDHH...HHDHH...T",
 "T..................T",
-"T..############....T",
-"T..#..........#....T",
-"T..#..........#....T",
-"T..#..........#....T",
-"T..######.#####....T",
+"T...HHHHHHHH.......T",
+"T...HHHHHHHH.......T",
+"T...HHHHHHHH.......R",
+"T...HHHYHHHH.......T",
+"T........RR........T",
 "T........RR.S......T",
 "T.HHHHHHH..........T",
 "T.HHHHHHH..........T",
@@ -1176,68 +1177,87 @@ seiryu:{name:'セイリュウシティ',rows:[
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
 warps:[{x:9,y:18,to:'route2',tx:9,ty:1},{x:10,y:18,to:'route2',tx:10,ty:1},
-       {x:9,y:0,to:'route3',tx:9,ty:18}],
+       {x:19,y:8,to:'route3',tx:1,ty:6},
+       {x:7,y:9,to:'seiryugym',tx:9,ty:9}],
 npcs:[
- {x:9,y:7,pal:'shop',dir:'down',nm:'ジムリーダー ソウマ',
-  trainer:{party:[['mushikoro',14],['kabutoga',17]],money:1600,
-   badge:{id:'midori'},
-   pre:['よく きたね。ぼくが セイリュウジムの ソウマだ。','むしタイプの つよさ、みせてあげよう!'],
-   win:['みごとだ。きみの ほうが うわてだった。'],
-   after:['きたの みちは もう とおれるよ。','つぎの まちには みずタイプの ジムがある。']}},
- {x:6,y:8,pal:'boy',dir:'right',nm:'ジムトレーナー',
-  trainer:{party:[['mushikoro',12],['chunpi',13]],money:480,
-   pre:['ソウマさんに あうには ぼくを たおしてから!'],
-   win:['うう… やるな。'],
-   after:['むしタイプは ほのお・ひこう・いわに よわい。']}},
- {x:12,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',
-  trainer:{party:[['kabutoga',14]],money:520,
-   pre:['カブトーガの かたさ、しってる?'],
-   win:['そんな…! かたさが たりなかった。'],
-   after:['かたくなる を つかう あいてには','とくこうげきより れんだが きくよ。']}},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
- {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'midori'},
-  say:['この さきは しゅぎょうの みち。','セイリュウジムの バッジが ないと とおせないよ。'],
-  say2:['みどりバッジ かくにん! どうぞ とおって。']},
+ {x:18,y:8,pal:'boy',dir:'left',nm:'けいびいん',open:[0,2],gate:{badge:'midori'},
+  say:['ひがしは しゅぎょうの みち。','セイリュウジムの バッジが ないと とおせないよ。'],
+  say2:['みどりバッジ かくにん! ひがしへ どうぞ。']},
  {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
-  say:['セイリュウシティは むしとりの まち。','もりが ちかいから みんな むしに くわしいの。']}
+  say:['セイリュウシティは むしとりの まち。','ジムの なかは いけがきの めいろに なってるの。']}
 ],
 signs:{'12,11':'かんばん:「セイリュウジム —— リーダー ソウマ / むしタイプ」'},
 enc:null},
 
-route3:{name:'ルート3',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
-"T........RR........T",
-"T..,,,...RR...,,,..T",
-"T..,,,...RR...,,,..T",
-"T........RR........T",
-"T..####..RR..####..T",
-"T..####..RR..####..T",
-"T........RR........T",
-"T..,,,,,,RR,,,,,,..T",
-"T..,,,,,,RR,,,,,,..T",
-"T........RR........T",
-"T..####..RR..####..T",
-"T..####..RR..####..T",
-"T........RR........T",
-"T..,,,...RR...,,,..T",
-"T..,,,...RR...,,,..T",
-"T........RR....S...T",
-"T........RR........T",
-"T........RR........T",
-"TTTTTTTTTRRTTTTTTTTT"],
-warps:[{x:9,y:19,to:'seiryu',tx:9,ty:1},{x:10,y:19,to:'seiryu',tx:9,ty:1},
-       {x:9,y:0,to:'cave',tx:9,ty:18},{x:10,y:0,to:'cave',tx:9,ty:18}],
+/* --- ジム1 むし: いけがきの迷路。通路のトレーナーを倒して道をあける --- */
+seiryugym:{name:'セイリュウジム',puz:1,rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wwwwwwwfwwwwwwwwwwww",
+"wffffffffwwwwwwwwwww",
+"wfwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wwwwwwwwwwwwwwwfwwww",
+"wffffffffffffffffffw",
+"wffffffffefffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:9,y:9,to:'seiryu',tx:7,ty:10}],
 npcs:[
- {x:8,y:8,pal:'rival',dir:'right',nm:'とざんか',
+ {x:9,y:2,pal:'shop',dir:'down',nm:'ジムリーダー ソウマ',
+  trainer:{party:[['mushikoro',14],['kabutoga',17]],money:1600,
+   badge:{id:'midori'},
+   pre:['よく ここまで きたね。ぼくが ソウマだ。','いけがきの めいろは たのしめたかな?','むしタイプの つよさ、みせてあげよう!'],
+   win:['みごとだ。きみの ほうが うわてだった。'],
+   after:['ひがしの みちは もう とおれるよ。','つぎの まちには みずタイプの ジムがある。']}},
+ {x:15,y:7,pal:'boy',dir:'down',nm:'ジムトレーナー',hide:'t_seiryugym_15_7',
+  trainer:{party:[['mushikoro',12],['chunpi',13]],money:480,
+   pre:['この つうろは とおさないよ!','ぼくを たおしてから いくんだね。'],
+   win:['うう… やるな。みちを あけるよ。'],
+   after:['—']}},
+ {x:1,y:5,pal:'girl',dir:'down',nm:'ジムトレーナー',hide:'t_seiryugym_1_5',
+  trainer:{party:[['kabutoga',14]],money:520,
+   pre:['ここも いきどまり? ざんねん、わたしが いるわ!'],
+   win:['そんな…! かたさが たりなかった。'],
+   after:['—']}},
+ {x:7,y:3,pal:'boy',dir:'down',nm:'ジムトレーナー',hide:'t_seiryugym_7_3',
+  trainer:{party:[['mushikoro',13],['kabutoga',15]],money:600,
+   pre:['ソウマさんの まえの さいごの かべだ!'],
+   win:['ここまでか… とおっていいぞ。'],
+   after:['—']}}
+],
+signs:{},
+enc:null},
+
+/* --- 東西に走る道。セイリュウの東門から入り、東の端で北へ抜ける --- */
+route3:{name:'ルート3',rows:[
+"TTTTTTTTTTTTTTTTTTTTTTTTRRTTTT",
+"T.......................RR...T",
+"T..,,,,....####.........RR...T",
+"T..,,,,....####.........RR...T",
+"T.......................RR...T",
+"T..####.....,,,,,.......RR...T",
+"RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
+"RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
+"T..,,,,,....####........,,,..T",
+"T..,,,,,....####........,,,..T",
+"T............................T",
+"T..,,,,,.......S.............T",
+"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"],
+warps:[{x:0,y:6,to:'seiryu',tx:18,ty:8},{x:0,y:7,to:'seiryu',tx:18,ty:8},
+       {x:24,y:0,to:'cave',tx:8,ty:18},{x:25,y:0,to:'cave',tx:8,ty:18}],
+npcs:[
+ {x:20,y:5,pal:'rival',dir:'down',nm:'とざんか',
   trainer:{party:[['iwagoro',16],['oononezu',17]],money:900,
    pre:['イワクラどうくつへ いくのか?','なら おれを こえてからだ!'],
    win:['どうくつの なかは くらいぞ。きをつけろ。'],
-   after:['いわタイプには みずと くさが よくきく。']}},
- {x:14,y:15,pal:'boy',dir:'left',nm:'ハイカー',
-  say:['きたの どうくつを ぬけると ヒナタ港町だ。','いわタイプが たくさん でるぞ!']}
+   after:['いわタイプには みずと みずと くさが よくきく。']}},
+ {x:10,y:10,pal:'boy',dir:'up',nm:'ハイカー',
+  say:['この みちは ひがしへ ずっと つづいてる。','つきあたりを きたへ いくと どうくつだ。']}
 ],
-signs:{'15,16':'かんばん:「きた ↑ イワクラどうくつ / みなみ ↓ セイリュウシティ」'},
+signs:{'15,11':'かんばん:「ひがし → イワクラどうくつ / にし ← セイリュウシティ」'},
 enc:{lv:[14,18],list:[['oononezu',20],['sorahane',18],['kabutoga',18],['iwagoro',16],['biritto',12],['honomera',10],['pukari',6]]}},
 
 cave:{name:'イワクラどうくつ',rows:[
@@ -1261,7 +1281,7 @@ cave:{name:'イワクラどうくつ',rows:[
 "_~~____~~~~~~____~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
-warps:[{x:8,y:19,to:'route3',tx:9,ty:1},{x:9,y:19,to:'route3',tx:9,ty:1},
+warps:[{x:8,y:19,to:'route3',tx:24,ty:1},{x:9,y:19,to:'route3',tx:24,ty:1},
        {x:8,y:0,to:'hinata',tx:9,ty:17},{x:9,y:0,to:'hinata',tx:9,ty:17}],
 npcs:[
  {x:16,y:9,pal:'boy',dir:'left',nm:'たんこうふ',
@@ -1283,10 +1303,10 @@ hinata:{name:'ヒナタ港町',rows:[
 "T..HHHHH...HHHHH...T",
 "T..HHDHH...HHDHH...T",
 "T..................T",
-"T....##########....T",
-"T....#........#....T",
-"T....#........#....T",
-"T....#####.####....T",
+"T....HHHHHHHH......T",
+"T....HHHHHHHH......T",
+"T....HHHHHHHH......T",
+"T....HHHYHHHH......T",
 "T........RR.S......T",
 "T........RR........T",
 "TWWWWW...RR...WWWWWT",
@@ -1297,33 +1317,53 @@ hinata:{name:'ヒナタ港町',rows:[
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
 warps:[{x:9,y:18,to:'cave',tx:8,ty:1},{x:10,y:18,to:'cave',tx:8,ty:1},
-       {x:9,y:0,to:'route4',tx:9,ty:18}],
+       {x:9,y:0,to:'route4',tx:9,ty:18},
+       {x:8,y:9,to:'hinatagym',tx:9,ty:9}],
 npcs:[
- {x:10,y:7,pal:'nurse',dir:'down',nm:'ジムリーダー ナミ',
-  trainer:{party:[['pukari',21],['uzushio',24]],money:2600,
-   badge:{id:'shiokaze'},
-   pre:['ヒナタジムへ ようこそ。わたしが ナミ。','みなとの みずは そう あまくないわよ!'],
-   win:['いい しおかぜが ふいたわね。あなたの かちよ。'],
-   after:['みなみの みちは もう とおれるわ。','つぎは たかだいの でんきジムね。']}},
- {x:7,y:8,pal:'boy',dir:'right',nm:'ジムトレーナー',
-  trainer:{party:[['pukari',19],['shizuku',20]],money:760,
-   pre:['ナミさんに あうには ぼくが あいてだ!'],
-   win:['まいった。みずタイプも かんぺきじゃないな。'],
-   after:['みずタイプには でんきと くさが よくきく。']}},
- {x:12,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',
-  trainer:{party:[['aquare',22]],money:820,
-   pre:['アクアーレの まもりは かたいわよ!'],
-   win:['ぼうぎょだけじゃ かてないのね…'],
-   after:['ぼうぎょが たかい あいてには','とくせいより タイプあいしょうを かんがえて!']}},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
  {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'shiokaze'},
   say:['この さきは テンボウ台への みち。','ヒナタジムの バッジが ないと とおせないよ。'],
   say2:['しおかぜバッジ かくにん! いってらっしゃい。']},
  {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
-  say:['ヒナタ港町は うみに ひらけた まち。','プカリが Lv24で ウズシオに しんかするのよ。']}
+  say:['ジムの なかは すいろが みちを ふさいでるの。','スイッチを ふむと みずが ひくらしいわ。']}
 ],
 signs:{'12,10':'かんばん:「ヒナタジム —— リーダー ナミ / みずタイプ」'},
+enc:null},
+
+/* --- ジム2 みず: スイッチで水門をひらく --- */
+hinatagym:{name:'ヒナタジム',puz:1,rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wwwwwwwwwAAwwwwwwwww",
+"wfffffffffffffff1ffw",
+"wWWWWWWWWffWWWWWWWWw",
+"wffffffffBBffffffffw",
+"wWWWWWWWWffWWWWWWWWw",
+"wff2fffffffffffffffw",
+"wffffffffefffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:9,y:9,to:'hinata',tx:8,ty:10}],
+npcs:[
+ {x:9,y:2,pal:'nurse',dir:'down',nm:'ジムリーダー ナミ',
+  trainer:{party:[['pukari',21],['uzushio',24]],money:2600,
+   badge:{id:'shiokaze'},
+   pre:['すいもんを あけて ここまで きたのね。','わたしが ヒナタジムの ナミ。','みなとの みずは そう あまくないわよ!'],
+   win:['いい しおかぜが ふいたわね。あなたの かちよ。'],
+   after:['きたの みちは もう とおれるわ。','つぎは たかだいの でんきジムね。']}},
+ {x:14,y:8,pal:'boy',dir:'left',nm:'ジムトレーナー',
+  trainer:{party:[['pukari',19],['shizuku',20]],money:760,
+   pre:['あおい スイッチが すいもんBを うごかすぞ!'],
+   win:['まいった。みずタイプも かんぺきじゃないな。'],
+   after:['あかい スイッチは おくの すいもんAだ。']}},
+ {x:5,y:6,pal:'girl',dir:'right',nm:'ジムトレーナー',
+  trainer:{party:[['aquare',22]],money:820,
+   pre:['ここまで これたのね。でも まだ とおさないわ!'],
+   win:['ぼうぎょだけじゃ かてないのね…'],
+   after:['スイッチは なんども ふめるわ。おちついてね。']}}
+],
+signs:{},
 enc:null},
 
 route4:{name:'ルート4',rows:[
@@ -1348,7 +1388,7 @@ route4:{name:'ルート4',rows:[
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
 warps:[{x:9,y:19,to:'hinata',tx:9,ty:1},{x:10,y:19,to:'hinata',tx:9,ty:1},
-       {x:9,y:0,to:'tenbou',tx:9,ty:17},{x:10,y:0,to:'tenbou',tx:10,ty:17}],
+       {x:9,y:0,to:'tenbou',tx:9,ty:16},{x:10,y:0,to:'tenbou',tx:10,ty:16}],
 npcs:[
  {x:12,y:9,pal:'rival',dir:'left',nm:'ライバル ケイ',
   trainer:{rival2:1,money:3000,
@@ -1368,11 +1408,10 @@ tenbou:{name:'テンボウ台',rows:[
 "T..HHHHH...HHHHH...T",
 "T..HHDHH...HHDHH...T",
 "T..................T",
-"T...###########....T",
-"T...#.........#....T",
-"T...#.........#....T",
-"T...#.........#....T",
-"T...#####.#####....T",
+"T...HHHHHHHHH......T",
+"T...HHHHHHHHH......T",
+"T...HHHHHHHHH......T",
+"T...HHHHYHHHH......T",
 "T........RR.S......T",
 "T..HHHHH...........T",
 "T..HHHHH...........T",
@@ -1381,34 +1420,59 @@ tenbou:{name:'テンボウ台',rows:[
 "T..F.....RR.....F..T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
-warps:[{x:9,y:18,to:'route4',tx:9,ty:1},{x:10,y:18,to:'route4',tx:10,ty:1},
-       {x:9,y:0,to:'route5',tx:9,ty:18}],
+warps:[{x:9,y:17,to:'route4',tx:9,ty:1},{x:10,y:17,to:'route4',tx:10,ty:1},
+       {x:9,y:0,to:'route5',tx:9,ty:18},
+       {x:8,y:9,to:'tenbougym',tx:9,ty:9}],
 npcs:[
  {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'ikazuchi'},
   say:['この さきは やまへ つづく けわしい みち。','テンボウジムの バッジが ないと とおせないよ。'],
   say2:['いかずちバッジ かくにん! きをつけて。']},
- {x:9,y:7,pal:'rival',dir:'down',nm:'ジムリーダー ライガ',
-  trainer:{party:[['biritto',26],['sorahane',27],['elekyu',29]],money:4200,
-   badge:{id:'ikazuchi'},
-   pre:['ここまで きたか。おれが ライガだ。','テンボウ台の かみなりを うけてみろ!'],
-   win:['…みごとだ。おまえの かちだ。'],
-   after:['きたの やまみちが ひらいた。','ガンセキ村、カザン町、ミドリ台…','まだ 3つ ジムが のこっているぞ。']}},
- {x:6,y:8,pal:'boy',dir:'right',nm:'ジムトレーナー',
-  trainer:{party:[['biritto',24],['chunpi',24]],money:1100,
-   pre:['ライガさんは おくだ。まず おれを たおせ!'],
-   win:['はやい… スピードで まけた。'],
-   after:['でんきタイプは くさに よわい。']}},
- {x:12,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',
-  trainer:{party:[['sorahane',25],['elekyu',26]],money:1250,
-   pre:['そらと かみなり、どっちも あいてよ!'],
-   win:['そんな…! かんぜんに よまれてた。'],
-   after:['ひこう＋でんきは いわタイプが てんてき。']}},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
- {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
-  say:['ここは たいりくで いちばん たかい まち。','はれた ひは うみまで みえるのよ。']}
+ {x:16,y:10,pal:'girl',dir:'left',nm:'まちのひと',
+  say:['ジムの なかは でんりゅうの とびらが 3まい。','スイッチを じゅんばんに ふむのよ。']}
 ],
-signs:{'12,11':'かんばん:「テンボウジム —— リーダー ライガ / でんきタイプ」'},
+signs:{'12,10':'かんばん:「テンボウジム —— リーダー ライガ / でんきタイプ」'},
+enc:null},
+
+/* --- ジム3 でんき: スイッチ3つで電流扉を順に開く --- */
+tenbougym:{name:'テンボウジム',puz:1,rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wwwwwwwwwCCwwwwwwwww",
+"wff3ffffffffffffffww",
+"wwwwwwwwwBBwwwwwwwww",
+"wffffffffffffff2fffw",
+"wwwwwwwwwAAwwwwwwwww",
+"wff1fffffffffffffffw",
+"wffffffffefffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:9,y:9,to:'tenbou',tx:8,ty:10}],
+npcs:[
+ {x:9,y:2,pal:'rival',dir:'down',nm:'ジムリーダー ライガ',
+  trainer:{party:[['biritto',26],['sorahane',27],['elekyu',29]],money:4200,
+   badge:{id:'ikazuchi'},
+   pre:['3まいの とびらを こじあけたか。','おれが テンボウジムの ライガだ。','たかだいの かみなりを うけてみろ!'],
+   win:['…みごとだ。おまえの かちだ。'],
+   after:['きたの やまみちが ひらいた。','ガンセキ村、カザン町、ミドリ台…','まだ 3つ ジムが のこっているぞ。']}},
+ {x:12,y:8,pal:'boy',dir:'left',nm:'ジムトレーナー',
+  trainer:{party:[['biritto',24],['chunpi',24]],money:1100,
+   pre:['あかい スイッチは あかい とびらを うごかす。','そのくらいは わかるよな?'],
+   win:['はやい… スピードで まけた。'],
+   after:['でんきタイプは くさに よわい。']}},
+ {x:6,y:6,pal:'girl',dir:'right',nm:'ジムトレーナー',
+  trainer:{party:[['sorahane',25],['elekyu',26]],money:1250,
+   pre:['2まいめ! ここは とおさないわよ!'],
+   win:['そんな…! かんぜんに よまれてた。'],
+   after:['きいろい スイッチが さいごの とびらよ。']}},
+ {x:12,y:4,pal:'boy',dir:'left',nm:'ジムトレーナー',
+  trainer:{party:[['elekyu',27],['sorahane',27]],money:1400,
+   pre:['ライガさんの まえの さいごの かべだ!'],
+   win:['…とおって いいぞ。'],
+   after:['ひこう＋でんきは いわタイプが てんてき。']}}
+],
+signs:{},
 enc:null},
 
 route5:{name:'ルート5',rows:[
@@ -1447,17 +1511,17 @@ signs:{'15,16':'かんばん:「きた ↑ ガンセキ村 / みなみ ↓ テ�
 enc:{lv:[26,31],list:[['gansekio',20],['sorahane',18],['elekyu',16],['oononezu',16],['kabutoga',14],['honomera',12],['uzushio',4]]}},
 
 ganseki:{name:'ガンセキ村',rows:[
-"TTTTTTTTTRTTTTTTTTTT",
-"T........R.........T",
+"TTTTTTTTTTTTTTTTTTTT",
+"T..................T",
 "T..HHHHH...HHHHH...T",
 "T..HHHHH...HHHHH...T",
 "T..HHDHH...HHDHH...T",
 "T..................T",
-"T..############....T",
-"T..#..........#....T",
-"T..#..........#....T",
-"T..#..........#....T",
-"T..######.#####....T",
+"T...HHHHHHHH.......T",
+"T...HHHHHHHH.......T",
+"T...HHHHHHHH.......R",
+"T...HHHYHHHH.......T",
+"T........RR........T",
 "T........RR.S......T",
 "T.####...........#.T",
 "T.####...........#.T",
@@ -1467,68 +1531,87 @@ ganseki:{name:'ガンセキ村',rows:[
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
 warps:[{x:9,y:18,to:'route5',tx:9,ty:1},{x:10,y:18,to:'route5',tx:10,ty:1},
-       {x:9,y:0,to:'route6',tx:9,ty:18}],
+       {x:19,y:8,to:'route6',tx:1,ty:6},
+       {x:7,y:9,to:'gansekigym',tx:5,ty:9}],
 npcs:[
- {x:9,y:7,pal:'boy',dir:'down',nm:'ジムリーダー イワオ',
-  trainer:{party:[['iwagoro',30],['gansekio',33],['gansekio',35]],money:5200,
-   badge:{id:'iwayama'},
-   pre:['わしが ガンセキジムの イワオじゃ。','やまの いわは そう かんたんには くだけん!'],
-   win:['…みごとに くだかれたわい。'],
-   after:['きたの みちが ひらいた。','つぎは カザン町の ほのおジムじゃ。']}},
- {x:6,y:8,pal:'girl',dir:'right',nm:'ジムトレーナー',
-  trainer:{party:[['iwagoro',28],['gansekio',30]],money:1500,
-   pre:['イワオさんに あうには わたしからよ!'],
-   win:['かたさだけじゃ だめなのね…'],
-   after:['いわタイプは みず・くさに とても よわい。']}},
- {x:12,y:8,pal:'boy',dir:'left',nm:'ジムトレーナー',
-  trainer:{party:[['gansekio',31],['oononezu',30]],money:1600,
-   pre:['やまで きたえた いわを うけてみろ!'],
-   win:['ぐぬぬ… つよい。'],
-   after:['ロックブラストは いわの なかでも いちげき がおもい。']}},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
- {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'iwayama'},
-  say:['この さきは カザンへ つづく みち。','ガンセキジムの バッジが ないと とおせないよ。'],
+ {x:18,y:8,pal:'boy',dir:'left',nm:'けいびいん',open:[0,2],gate:{badge:'iwayama'},
+  say:['ひがしは カザンへ つづく みち。','ガンセキジムの バッジが ないと とおせないよ。'],
   say2:['いわやまバッジ かくにん! あつさに きをつけて。']},
  {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
-  say:['ガンセキ村は いわを ほって くらす むら。','イワゴロは Lv24で ガンセキオーに なるのよ。']}
+  say:['ジムの なかは おおきな いわが みちを ふさいでる。','よこから おして どかすんだよ。']}
 ],
 signs:{'12,11':'かんばん:「ガンセキジム —— リーダー イワオ / いわタイプ」'},
 enc:null},
 
-route6:{name:'ルート6',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
-"T........RR........T",
-"T..,,,,..RR..####..T",
-"T..,,,,..RR..####..T",
-"T........RR........T",
-"T..####..RR..,,,,..T",
-"T..####..RR..,,,,..T",
-"T........RR........T",
-"T..,,,,,,RR,,,,,,..T",
-"T..,,,,,,RR,,,,,,..T",
-"T........RR........T",
-"T..####..RR..####..T",
-"T..####..RR..####..T",
-"T........RR........T",
-"T..,,,,..RR..,,,,..T",
-"T..,,,,..RR..,,,,..T",
-"T........RR....S...T",
-"T........RR........T",
-"T........RR........T",
-"TTTTTTTTTRRTTTTTTTTT"],
-warps:[{x:9,y:19,to:'ganseki',tx:9,ty:1},{x:10,y:19,to:'ganseki',tx:9,ty:1},
-       {x:9,y:0,to:'kazan',tx:9,ty:18},{x:10,y:0,to:'kazan',tx:9,ty:18}],
+/* --- ジム4 いわ: 岩を横へ押してすきまをあける --- */
+gansekigym:{name:'ガンセキジム',puz:1,rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wwwwwwwwwfwwwwwwwwww",
+"wffffffffOfffffffffw",
+"wwwwwwwwwwwwwwwfwwww",
+"wffffffffffffffOfffw",
+"wwwwwwwwwfwwwwwwwwww",
+"wffffffffOfffffffffw",
+"wffffefffffffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:5,y:9,to:'ganseki',tx:7,ty:10}],
 npcs:[
- {x:12,y:8,pal:'rival',dir:'left',nm:'かざんけんきゅうか',
+ {x:9,y:2,pal:'boy',dir:'down',nm:'ジムリーダー イワオ',
+  trainer:{party:[['iwagoro',30],['gansekio',33],['gansekio',35]],money:5200,
+   badge:{id:'iwayama'},
+   pre:['いわを おしのけて きたか。','わしが ガンセキジムの イワオじゃ。','やまの いわは そう かんたんには くだけん!'],
+   win:['…みごとに くだかれたわい。'],
+   after:['ひがしの みちが ひらいた。','つぎは カザン町の ほのおジムじゃ。']}},
+ {x:14,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',hide:'t_gansekigym_14_8',
+  trainer:{party:[['iwagoro',28],['gansekio',30]],money:1500,
+   pre:['いわは よこから おすんだよ。','…と おしえる まえに しょうぶだ!'],
+   win:['かたさだけじゃ だめなのね…'],
+   after:['いわタイプは みず・くさに とても よわい。']}},
+ {x:4,y:6,pal:'boy',dir:'right',nm:'ジムトレーナー',hide:'t_gansekigym_4_6',
+  trainer:{party:[['gansekio',31],['oononezu',30]],money:1600,
+   pre:['やまで きたえた いわを うけてみろ!'],
+   win:['ぐぬぬ… つよい。'],
+   after:['ロックブラストは いわの なかでも いちげき がおもい。']}},
+ {x:14,y:4,pal:'girl',dir:'left',nm:'ジムトレーナー',hide:'t_gansekigym_14_4',
+  trainer:{party:[['gansekio',33]],money:1700,
+   pre:['さいごの いわ、おせるかしら?'],
+   win:['…どうぞ、おくへ。'],
+   after:['いわが かべに ぶつかると もう うごかないわ。']}}
+],
+signs:{},
+enc:null},
+
+/* --- 東西に走る道。ガンセキ村の東門から入り、東の端で北へ抜ける --- */
+route6:{name:'ルート6',rows:[
+"TTTTTTTTTTTTTTTTTTTTTTTTRRTTTT",
+"T.......................RR...T",
+"T..####.....,,,,,.......RR...T",
+"T..####.....,,,,,.......RR...T",
+"T.......................RR...T",
+"T..,,,,,....####........RR...T",
+"RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
+"RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
+"T..,,,,,....####........,,,..T",
+"T..,,,,,....####........,,,..T",
+"T............................T",
+"T..####........S.............T",
+"TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"],
+warps:[{x:0,y:6,to:'ganseki',tx:18,ty:8},{x:0,y:7,to:'ganseki',tx:18,ty:8},
+       {x:24,y:0,to:'kazan',tx:8,ty:18},{x:25,y:0,to:'kazan',tx:8,ty:18}],
+npcs:[
+ {x:20,y:5,pal:'rival',dir:'down',nm:'かざんけんきゅうか',
   trainer:{party:[['honomera',32],['enblaze',34]],money:2800,
    pre:['この さきは かつかざんだ。','なまはんかな そなえでは とおさんぞ!'],
    win:['ほう… なかなか やるな。'],
    after:['ホノメラは Lv30で エンブレイズに しんかする。','ほのおは みず・いわに よわい。わすれるな。']}},
- {x:6,y:15,pal:'boy',dir:'right',nm:'ハイカー',
-  say:['きたの カザン洞は ようがんだらけだ。','とおれる みちを さがすんだぞ。']}
+ {x:10,y:10,pal:'boy',dir:'up',nm:'ハイカー',
+  say:['この みちも ひがしへ ずっと つづいてる。','つきあたりを きたへ いくと カザン洞だ。']}
 ],
-signs:{'15,16':'かんばん:「きた ↑ カザン洞 / みなみ ↓ ガンセキ村」'},
+signs:{'15,11':'かんばん:「ひがし → カザン洞 / にし ← ガンセキ村」'},
 enc:{lv:[30,35],list:[['honomera',22],['gansekio',18],['tenkuga',10],['elekyu',16],['gigakuwaga',10],['oononezu',14],['enblaze',10]]}},
 
 kazan:{name:'カザン洞',rows:[
@@ -1552,7 +1635,7 @@ kazan:{name:'カザン洞',rows:[
 "_~~LLL~~~~~~~~LLL~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
-warps:[{x:8,y:19,to:'route6',tx:9,ty:1},{x:9,y:19,to:'route6',tx:9,ty:1},
+warps:[{x:8,y:19,to:'route6',tx:24,ty:1},{x:9,y:19,to:'route6',tx:24,ty:1},
        {x:8,y:0,to:'kazanmachi',tx:9,ty:17},{x:9,y:0,to:'kazanmachi',tx:9,ty:17}],
 npcs:[
  {x:16,y:9,pal:'shop',dir:'left',nm:'ようがんつかい',
@@ -1574,10 +1657,10 @@ kazanmachi:{name:'カザン町',rows:[
 "T..HHHHH...HHHHH...T",
 "T..HHDHH...HHDHH...T",
 "T..................T",
-"T....##########....T",
-"T....#........#....T",
-"T....#........#....T",
-"T....#####.####....T",
+"T....HHHHHHHH......T",
+"T....HHHHHHHH......T",
+"T....HHHHHHHH......T",
+"T....HHHYHHHH......T",
 "T........RR.S......T",
 "T........RR........T",
 "T..####..RR..####..T",
@@ -1588,33 +1671,58 @@ kazanmachi:{name:'カザン町',rows:[
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
 warps:[{x:9,y:18,to:'kazan',tx:8,ty:1},{x:10,y:18,to:'kazan',tx:8,ty:1},
-       {x:9,y:0,to:'route7',tx:9,ty:18}],
+       {x:9,y:0,to:'route7',tx:9,ty:18},
+       {x:8,y:9,to:'kazangym',tx:9,ty:9}],
 npcs:[
- {x:10,y:7,pal:'shop',dir:'down',nm:'ジムリーダー ヒムラ',
-  trainer:{party:[['honomera',34],['burnix',36],['enblaze',39]],money:6400,
-   badge:{id:'kaen'},
-   pre:['カザンジムへ ようこそ。おれが ヒムラだ。','この まちの ほのおは かざんの ちからで もえている!'],
-   win:['…みごとに けされたな。おまえの かちだ。'],
-   after:['きたの みちが ひらいた。','さいごは ミドリ台の くさジムだ。']}},
- {x:7,y:8,pal:'boy',dir:'right',nm:'ジムトレーナー',
-  trainer:{party:[['honomera',33],['enblaze',35]],money:1900,
-   pre:['ヒムラさんに あうには おれからだ!'],
-   win:['あつさが たりなかったか…'],
-   after:['ほのおタイプは みず・いわに よわい。']}},
- {x:12,y:8,pal:'girl',dir:'left',nm:'ジムトレーナー',
-  trainer:{party:[['burnix',35],['gigakuwaga',34]],money:2000,
-   pre:['ほのおと むしの コンビよ!'],
-   win:['よまれてた… くやしい。'],
-   after:['むしタイプは ほのおの わざと あいしょうが いい。']}},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
  {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'kaen'},
   say:['この さきは ミドリ台への みち。','カザンジムの バッジが ないと とおせないよ。'],
   say2:['かえんバッジ かくにん! さいごの ジムは すぐそこだ。']},
  {x:16,y:10,pal:'girl',dir:'left',nm:'まちのひと',
-  say:['カザン町は かざんの ふもとの まち。','おんせんが じまんなの!']}
+  say:['ジムの ゆかは ようがんだらけ。','ほそい みちを たどらないと わたれないの。']}
 ],
 signs:{'12,10':'かんばん:「カザンジム —— リーダー ヒムラ / ほのおタイプ」'},
+enc:null},
+
+/* --- ジム5 ほのお: 溶岩のあいだの細い道をたどる --- */
+kazangym:{name:'カザンジム',puz:1,rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wLLLLLLLLffLLLLLLLLw",
+"wLLLLLLLLfLLLLLLLLLw",
+"wfffffffffLLLLLLLLLw",
+"wfLLLLLLLLLLLLLLLLLw",
+"wfLLLLLLLLLLLLLLLLLw",
+"wffffffffffffffffffw",
+"wffffffffefffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:9,y:9,to:'kazanmachi',tx:8,ty:10}],
+npcs:[
+ {x:9,y:2,pal:'shop',dir:'down',nm:'ジムリーダー ヒムラ',
+  trainer:{party:[['honomera',34],['burnix',36],['enblaze',39]],money:6400,
+   badge:{id:'kaen'},
+   pre:['ようがんの みちを わたってきたか!','おれが カザンジムの ヒムラだ。','この ほのおは かざんの ちからで もえている!'],
+   win:['…みごとに けされたな。おまえの かちだ。'],
+   after:['きたの みちが ひらいた。','さいごは ミドリ台の くさジムだ。']}},
+ {x:4,y:8,pal:'boy',dir:'up',nm:'ジムトレーナー',hide:'t_kazangym_4_8',
+  trainer:{party:[['honomera',33],['enblaze',35]],money:1900,
+   pre:['にしの はしを とおる きだな? おれが あいてだ!'],
+   win:['あつさが たりなかったか…'],
+   after:['ほのおタイプは みず・いわに よわい。']}},
+ {x:1,y:6,pal:'girl',dir:'right',nm:'ジムトレーナー',hide:'t_kazangym_1_6',
+  trainer:{party:[['burnix',35],['gigakuwaga',34]],money:2000,
+   pre:['この ほそみちは とおさないわよ!'],
+   win:['よまれてた… くやしい。どうぞ。'],
+   after:['—']}},
+ {x:5,y:5,pal:'boy',dir:'right',nm:'ジムトレーナー',hide:'t_kazangym_5_5',
+  trainer:{party:[['enblaze',37],['honomera',35]],money:2200,
+   pre:['ヒムラさんの まえの さいごの かべだ!'],
+   win:['…とおって いいぞ。'],
+   after:['むしタイプは ほのおの わざと あいしょうが いい。']}}
+],
+signs:{},
 enc:null},
 
 route7:{name:'ルート7',rows:[
@@ -1659,11 +1767,10 @@ midori:{name:'ミドリ台',rows:[
 "T..HHHHH...HHHHH...T",
 "T..HHDHH...HHDHH...T",
 "T..................T",
-"T...###########....T",
-"T...#.........#....T",
-"T...#.........#....T",
-"T...#.........#....T",
-"T...#####.#####....T",
+"T...HHHHHHHHH......T",
+"T...HHHHHHHHH......T",
+"T...HHHHHHHHH......T",
+"T...HHHHYHHHH......T",
 "T........RR.S......T",
 "T..HHHHH...........T",
 "T..HHHHH...........T",
@@ -1672,37 +1779,64 @@ midori:{name:'ミドリ台',rows:[
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
-warps:[{x:9,y:18,to:'route7',tx:9,ty:1},{x:10,y:18,to:'route7',tx:10,ty:1}],
+warps:[{x:9,y:17,to:'route7',tx:9,ty:1},{x:10,y:17,to:'route7',tx:10,ty:1},
+       {x:8,y:9,to:'midorigym',tx:9,ty:9}],
 npcs:[
- {x:9,y:7,pal:'shop',dir:'down',nm:'ジムリーダー ワカバ',
-  trainer:{party:[['jukario',38],['gigakuwaga',40],['jukario',43]],money:8000,
-   badge:{id:'wakaba'},
-   pre:['ミドリ台へ ようこそ。わたしが ワカバ。','ここは たいりくの はて。さいごの ジムよ。','あなたの ぼうけんの こたえを みせて!'],
-   win:['…すばらしい。6つめの バッジ、うけとって。'],
-   after:['ひろばに ライバルの こが きているわ。','さいごの しょうぶを して いらっしゃい。']}},
- {x:6,y:8,pal:'girl',dir:'right',nm:'ジムトレーナー',
-  trainer:{party:[['jukario',36],['uzushio',37]],money:2400,
-   pre:['ワカバさんに あうには わたしからよ!'],
-   win:['ここまで きたのね… いってらっしゃい。'],
-   after:['くさタイプは ほのお・ひこう・むし・どくに よわい。']}},
- {x:12,y:8,pal:'boy',dir:'left',nm:'ジムトレーナー',
-  trainer:{party:[['gigakuwaga',38],['jukario',38]],money:2500,
-   pre:['さいごの ジムは そう あまくないぞ!'],
-   win:['まいった。きみの かちだ。'],
-   after:['こうごうせいを つかう あいてには','いっきに おおダメージを あたえるのが こつだ。']}},
- {x:5,y:11,pal:'rival',dir:'right',nm:'ライバル ケイ',
+ {x:5,y:10,pal:'rival',dir:'right',nm:'ライバル ケイ',
   trainer:{rival3:1,money:12000,
    pre:['ここが さいごだ。','おれも おまえも、よく ここまで きたよな。','—— いくぜ! ぜんりょくで こい!'],
    win:['…かんぜんに まけた。','おまえは おれの しってる いちばんの トレーナーだ。','またな、あいぼう!'],
    after:['また いつでも しょうぶしようぜ!']}},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
- {x:16,y:11,pal:'girl',dir:'left',nm:'まちのひと',
-  say:['ミドリ台は りくの はて。','ここから さきは うみが つづくだけよ。']}
+ {x:16,y:10,pal:'girl',dir:'left',nm:'まちのひと',
+  say:['ジムの おくの とびらは、','なかの トレーナーを ぜんいん たおすと ひらくの。']}
 ],
-signs:{'12,11':'かんばん:「ミドリジム —— リーダー ワカバ / くさタイプ」'},
+signs:{'12,10':'かんばん:「ミドリジム —— リーダー ワカバ / くさタイプ」'},
+enc:null},
+
+/* --- ジム6 くさ: 生垣の迷路。トレーナー全員を倒すと最奥の扉が開く --- */
+midorigym:{name:'ミドリジム',puz:1,rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wwwwwwwwwGGwwwwwwwww",
+"wffffffffffffffffffw",
+"wwwwfwwwwwwwwwfwwwww",
+"wffffffffffffffffffw",
+"wwwwwwwwfwfwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffefffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:9,y:9,to:'midori',tx:8,ty:10}],
+npcs:[
+ {x:9,y:2,pal:'shop',dir:'down',nm:'ジムリーダー ワカバ',
+  trainer:{party:[['jukario',38],['gigakuwaga',40],['jukario',43]],money:8000,
+   badge:{id:'wakaba'},
+   pre:['3にんを たおして とびらを ひらいたのね。','わたしが ミドリジムの ワカバ。','ここは たいりくの はて。さいごの ジムよ!'],
+   win:['…すばらしい。6つめの バッジ、うけとって。'],
+   after:['ひろばに ライバルの こが きているわ。','さいごの しょうぶを して いらっしゃい。']}},
+ {x:3,y:8,pal:'girl',dir:'down',nm:'ジムトレーナー',guard:1,
+  trainer:{party:[['jukario',36],['uzushio',37]],money:2400,
+   pre:['おくの とびらは わたしたち 3にんを','たおさないと ひらかないわ!'],
+   win:['1にんめ… まだ 2にん いるわよ。'],
+   after:['のこりは めいろの おくよ。']}},
+ {x:8,y:6,pal:'boy',dir:'left',nm:'ジムトレーナー',guard:1,
+  trainer:{party:[['gigakuwaga',38],['jukario',38]],money:2500,
+   pre:['2にんめだ! そう かんたんには いかないぞ!'],
+   win:['まいった。あと ひとりだ。'],
+   after:['こうごうせいを つかう あいてには','いっきに おおダメージを あたえるのが こつだ。']}},
+ {x:16,y:4,pal:'girl',dir:'right',nm:'ジムトレーナー',guard:1,
+  trainer:{party:[['jukario',39],['gigakuwaga',39]],money:2700,
+   pre:['さいごの ひとり! これで とびらが きまるわ!'],
+   win:['…とびらが ひらいたわ。いってらっしゃい。'],
+   after:['くさタイプは ほのお・ひこう・むしに よわい。']}}
+],
+signs:{},
 enc:null}
 };
+
+for(const k in MAPS) MAPS[k].key=k;      /* 自分のキーを引けるようにしておく */
 
 /* ============================ タイル描画 ============================ */
 function hsh(x,y,s){ let n=(x*374761393+y*668265263+(s||0)*1274126177)|0; n=(n^(n>>13))*1274126177; return ((n^(n>>16))>>>0)/4294967296; }
@@ -1770,6 +1904,54 @@ function drawTile(ch,px_,py,wx,wy){
       g.fillStyle='#5e5058'; g.fillRect(px_+2,py+2,7,4);
       g.fillStyle='#241d24'; g.fillRect(px_,py+12,16,4); g.fillRect(px_+9,py+4,4,5);
       break;
+    case 'f':                                        /* 屋内の床 */
+      g.fillStyle=((wx+wy)&1)?'#5c5470':'#544c66'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#6a6280'; g.fillRect(px_,py,16,1); g.fillRect(px_,py,1,16);
+      break;
+    case 'w':                                        /* 屋内の壁 */
+      g.fillStyle='#3a3450'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#4a4468'; g.fillRect(px_+1,py+1,14,9);
+      g.fillStyle='#2a2540'; g.fillRect(px_,py+11,16,5);
+      g.fillStyle='#5a5480'; g.fillRect(px_+2,py+2,6,3);
+      break;
+    case 'e':                                        /* 出口のマット */
+      g.fillStyle='#5c5470'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#c04030'; g.fillRect(px_+1,py+3,14,10);
+      g.fillStyle='#e06048'; g.fillRect(px_+2,py+4,12,4);
+      g.fillStyle='#f0d060'; g.fillRect(px_+5,py+7,6,2);
+      break;
+    case 'Y':{                                       /* ジムの入口 */
+      g.fillStyle='#6b4326'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#8a5c36'; g.fillRect(px_+1,py+1,14,15);
+      g.fillStyle='#5a361e'; g.fillRect(px_+7,py+3,2,13);
+      g.fillStyle='#f0d060'; g.fillRect(px_+2,py+1,12,3);
+      g.fillStyle='#20161f'; g.fillRect(px_+4,py+2,2,1); g.fillRect(px_+8,py+2,4,1);
+      break;}
+    case '1': case '2': case '3':{                   /* スイッチ */
+      const on=puz&&puz.sw[+ch];
+      const col=['#e0503c','#3fa0e8','#f0c030'][+ch-1];
+      g.fillStyle='#4a4468'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#2a2540'; g.fillRect(px_+1,py+1,14,14);
+      g.fillStyle=on?col:'#3a3450'; g.fillRect(px_+3,py+3,10,10);
+      if(on){ g.fillStyle='#ffffff'; g.fillRect(px_+5,py+5,3,3); }
+      break;}
+    case 'A': case 'B': case 'C':{                   /* スイッチ扉（閉） */
+      const col=['#e0503c','#3fa0e8','#f0c030'][ch.charCodeAt(0)-65];
+      g.fillStyle='#2a2540'; g.fillRect(px_,py,16,16);
+      for(let i=0;i<4;i++){ g.fillStyle=(Math.floor(tick/6)+i)%2?col:'#ffffff';
+        g.fillRect(px_,py+i*4+1,16,2); }
+      break;}
+    case 'G':                                        /* トレーナー扉（閉） */
+      g.fillStyle='#2a2540'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#8a8298'; g.fillRect(px_+1,py,3,16); g.fillRect(px_+6,py,3,16); g.fillRect(px_+11,py,3,16);
+      g.fillStyle='#c8c0d8'; g.fillRect(px_,py+6,16,3);
+      break;
+    case 'O':                                        /* 押せる岩 */
+      g.fillStyle='#5c5470'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#8a8278'; g.fillRect(px_+1,py+2,14,13);
+      g.fillStyle='#bab2a6'; g.fillRect(px_+2,py+3,10,5);
+      g.fillStyle='#5a544e'; g.fillRect(px_+1,py+12,14,3); g.fillRect(px_+6,py+8,5,2);
+      break;
     case 'L':{                                       /* 溶岩。渡れない */
       g.fillStyle='#a82c0c'; g.fillRect(px_,py,16,16);
       g.fillStyle='#e85818'; g.fillRect(px_,py+2,16,7);
@@ -1827,6 +2009,7 @@ function load(){
     if(!G.badges) G.badges={};
     if(!G.box) G.box=[];
     if(!MAPS[G.map]){ G.map='town'; G.x=9; G.y=15; }
+    initPuz(G.map);
     return true;
   }catch(e){ return false; }
 }
@@ -1838,9 +2021,26 @@ const alive=()=>G.party.filter(m=>m.hp>0);
 
 /* ============================ 移動 ============================ */
 let mv=null, bob=0, cam={x:0,y:0};
+/* ジムの仕掛けの状態。マップに入るたびに初期化する（部屋を出ればリセット） */
+let puz=null;
+function initPuz(k){ puz=(MAPS[k]&&MAPS[k].puz)?{map:k,sw:{},ov:{}}:null; }
+/* ジムトレーナーを全員倒すと開く扉 */
+function gateOpen(mp){
+  if(!G) return false;
+  const gs=(mp.npcs||[]).filter(n=>n.trainer&&n.guard);
+  return gs.length>0 && gs.every(n=>G.flags['t_'+mp.key+'_'+n.x+'_'+n.y]);
+}
 function tileAt(mp,x,y){
   const r=mp.rows; if(y<0||y>=r.length||x<0||x>=r[0].length) return 'T';
-  return r[y][x];
+  const c=r[y][x];
+  if(c==='G') return gateOpen(mp)?'f':'G';
+  if(puz&&puz.map===mp.key){
+    const o=puz.ov[x+','+y]; if(o!==undefined) return o;
+    if(c==='A'&&puz.sw[1]) return 'f';
+    if(c==='B'&&puz.sw[2]) return 'f';
+    if(c==='C'&&puz.sw[3]) return 'f';
+  }
+  return c;
 }
 /* 門番はバッジを見せると脇へどく。倒したトレーナーは hide フラグで消える */
 const npcOpen=n=>!!(n.gate&&hasBadge(n.gate.badge));
@@ -1856,6 +2056,16 @@ const DIRV={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 function tryMove(dir){
   G.dir=dir;
   const [dx,dy]=DIRV[dir], nx=G.x+dx, ny=G.y+dy;
+  if(puz && tileAt(M(),nx,ny)==='O' && !npcAt(M(),nx,ny)){
+    /* 岩押し。押した先が床なら岩ごと1マス進む */
+    const bx=nx+dx, by=ny+dy, t=tileAt(M(),bx,by);
+    if((t==='f'||t==='.')&&!npcAt(M(),bx,by)){
+      puz.ov[nx+','+ny]='f'; puz.ov[bx+','+by]='O';
+      sfx('no'); ui.flashScreen=4;
+      mv={dx,dy,t:0,dur:15};
+    }
+    return;
+  }
   if(blocked(M(),nx,ny)) return;
   mv={dx,dy,t:0,dur:13};
 }
@@ -1876,6 +2086,12 @@ function onStep(){
   const mp=M();
   const w=(mp.warps||[]).find(w=>w.x===G.x&&w.y===G.y);
   if(w){ doWarp(w); return; }
+  const st=mp.rows[G.y][G.x];
+  if(puz&&(st==='1'||st==='2'||st==='3')){
+    puz.sw[+st]=!puz.sw[+st];
+    sfx(puz.sw[+st]?'ok':'no'); ui.flashScreen=8;
+    return;
+  }
   if(tileAt(mp,G.x,G.y)===(mp.encTile||',')&&mp.enc&&alive().length){
     if(Math.random()<(mp.encRate||0.13)) startWild(mp);
   }
@@ -1884,7 +2100,7 @@ async function doWarp(w){
   ui.busy=true; sfx('warp');
   for(let i=0;i<=10;i++){ ui.fade=i/10; await sleep(20); }
   G.map=w.to; G.x=w.tx; G.y=w.ty; mv=null;
-  bgmSync();
+  initPuz(w.to); bgmSync();
   ui.busy=false; ui.banner={t:MAPS[w.to].name,n:110};
   for(let i=10;i>=0;i--){ ui.fade=i/10; await sleep(20); }
   ui.fade=0;
