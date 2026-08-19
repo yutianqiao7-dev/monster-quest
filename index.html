@@ -2389,6 +2389,9 @@ async function throwBall(key){
 async function battle(o){
   const prev=scene; scene='battle'; ui.busy=true;
   const isTr=!!o.trainer;
+  const friendly=isTr&&o.trainer.friendly;
+  /* 友達戦は本編に一切影響させない。開始前の状態を控えて終了時に戻す */
+  const snap=friendly?G.party.map(m=>({hp:m.hp,st:m.st,slp:m.slp,pp:m.mv.map(s=>s.pp)})):null;
   bgmPlay(isTr?'boss':'battle');
   bt={tr:o.trainer||null, ei:0, wild:!isTr,
       foe:isTr?o.trainer.party[0]:o.wild, me:alive()[0],
@@ -2438,18 +2441,21 @@ async function battle(o){
     await endTurnStatus('me'); await endTurnStatus('foe');
     const f=await faintCheck();
     if(f==='foe'){
-      await gainExp();
+      if(!friendly) await gainExp();
       if(isTr && bt.ei<o.trainer.party.length-1){
         bt.ei++; bt.foe=o.trainer.party[bt.ei]; resetB(bt.foe); bt.df=bt.foe.hp;
         bt.anim.fh=0; seen(bt.foe.id);
         await say(o.trainer.name+'は '+nm(bt.foe)+'を くりだした!');
       } else {
-        if(isTr){
+        if(friendly){
+          await say(o.trainer.name+'に かった!');
+          for(const l of o.trainer.win) await say(l,{name:o.trainer.name});
+        } else if(isTr){
           const mn=o.trainer.money; G.money=Math.min(999999,G.money+mn);
           await say(o.trainer.name+'に かった!');
           await say('しょうきんとして '+mn+'えんを てにいれた!');
           for(const l of o.trainer.win) await say(l,{name:o.trainer.name});
-          G.flags[o.trainer.key]=1;
+          if(o.trainer.key) G.flags[o.trainer.key]=1;
           if(o.trainer.badge && !hasBadge(o.trainer.badge.id)){
             const bd=BADGES.find(b=>b.id===o.trainer.badge.id);
             G.badges[bd.id]=1; sfx('catch'); ui.flashScreen=20;
@@ -2474,7 +2480,14 @@ async function battle(o){
   }
   for(let i=14;i>=0;i--){ bt.intro=i/14; await sleep(24); }
   bt=null; scene='field'; ui.busy=false; ui.text=null; bgmSync();
-  if(result==='lose'){
+  if(friendly){
+    ui.busy=true;
+    G.party.forEach((m,i)=>{ const q=snap[i]; if(!q) return;
+      m.hp=q.hp; m.st=q.st; m.slp=q.slp; m.mv.forEach((s,j)=>{ s.pp=q.pp[j]; }); });
+    if(result==='lose') await say('ともだちに まけてしまった…');
+    await say('※ つうしんたいせんは ぼうけんの きろくに えいきょう しません。');
+    ui.busy=false;
+  } else if(result==='lose'){
     ui.busy=true;
     await say('めのまえが まっくらに なった…');
     G.money=Math.floor(G.money/2);
@@ -2484,7 +2497,7 @@ async function battle(o){
     await say('モンスターたちは かいふく した!');
     ui.busy=false;
   }
-  if(result==='win'&&badgeCount()>=BADGES.length&&!G.flags.ending){
+  if(result==='win'&&!friendly&&badgeCount()>=BADGES.length&&!G.flags.ending){
     G.flags.ending=1; ui.busy=true;
     await say('—— 6つの バッジが すべて そろった。');
     await say('ハジマリの町から ミドリ台まで、ながい みちのりだった。');
@@ -2601,21 +2614,454 @@ async function shop(n){
   }
   await say('まいど ありがとうございます!',{name:n.nm});
 }
+/* ============================ つうしん対戦 ============================ */
+/* サーバーを持てないので方式は2つ。
+   1) チームコード: 手持ちを文字列にして渡し、相手のチームとAI戦
+   2) ちょくせつ対戦: WebRTC で端末同士を直結し、同時進行のターン制 */
+const MOVEKEYS=Object.keys(MV);
+const B32='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';   /* 紛らわしい 0O1I を除く */
+
+function bytesToCode(b){
+  let bits=0,val=0,out='';
+  for(const x of b){ val=(val<<8)|x; bits+=8;
+    while(bits>=5){ out+=B32[(val>>>(bits-5))&31]; bits-=5; } }
+  if(bits>0) out+=B32[(val<<(5-bits))&31];
+  return out.replace(/(.{5})(?=.)/g,'$1-');
+}
+function codeToBytes(s){
+  s=(s||'').toUpperCase().replace(/O/g,'0').replace(/I/g,'1').replace(/[^0-9A-Z]/g,'');
+  let bits=0,val=0; const out=[];
+  for(const ch of s){ const i=B32.indexOf(ch); if(i<0) return null;
+    val=(val<<5)|i; bits+=5;
+    if(bits>=8){ out.push((val>>>(bits-8))&255); bits-=8; } }
+  return out;
+}
+function encTeam(party){
+  const live=party.slice(0,6);
+  if(!live.length) return null;
+  const b=[1,live.length];
+  for(const m of live){
+    b.push(Math.max(0,DEXORDER.indexOf(m.id)), clamp(m.lv,1,100));
+    for(let i=0;i<4;i++){ const s=m.mv[i]; b.push(s?MOVEKEYS.indexOf(s.k)+1:0); }
+  }
+  let c=0; for(const x of b) c=(c+x)&255; b.push(c);
+  return bytesToCode(b);
+}
+function decTeam(code){
+  const b=codeToBytes(code);
+  if(!b||b.length<9) return null;
+  let c=0; for(let i=0;i<b.length-1;i++) c=(c+b[i])&255;
+  if(c!==b[b.length-1]||b[0]!==1) return null;
+  const n=b[1];
+  if(n<1||n>6||b.length<2+n*6+1) return null;
+  const out=[];
+  for(let i=0;i<n;i++){
+    const o=2+i*6, id=DEXORDER[b[o]];
+    if(!id) return null;
+    const m=mk(id,clamp(b[o+1],1,100));
+    const mvs=[];
+    for(let j=0;j<4;j++){ const k=b[o+2+j], key=k?MOVEKEYS[k-1]:null;
+      if(key) mvs.push({k:key,pp:MV[key].pp,mp:MV[key].pp}); }
+    if(mvs.length) m.mv=mvs;
+    m.name=SP[id].n; m.hp=m.max; m.st=null; m.slp=0;
+    resetB(m);
+    out.push(m);
+  }
+  return out;
+}
+/* 対戦用に手持ちを全回復した複製にする（本編のセーブに影響させない） */
+function battleClone(party){
+  return party.slice(0,6).map(m=>{
+    const c=JSON.parse(JSON.stringify(m));
+    c.hp=c.max; c.st=null; c.slp=0;
+    c.mv.forEach(s=>{ s.pp=s.mp; });
+    resetB(c); return c;
+  });
+}
+async function showCode(title,code){
+  await say(title);
+  let copied=false;
+  try{ await navigator.clipboard.writeText(code); copied=true; }catch(e){}
+  window.prompt(copied?'コピー ずみ! そのまま おくれます':'ながおしで コピーして おくってください',code);
+  await say(copied?'クリップボードに コピーした!':'コードを ともだちに おくってね。');
+}
+const askCode=msg=>((window.prompt(msg,'')||'').trim());
+
+/* ---------------- 1) チームコード対戦 ---------------- */
+async function codeBattleMenu(){
+  while(true){
+    const c=await choose(['じぶんの コードを みる','コードで たいせんする','もどる'],
+      {x:8,y:44,w:144,cols:1,cancel:true,title:'チームコード たいせん'});
+    if(c<0||c===2) return;
+    if(c===0){
+      const code=encTeam(G.party);
+      if(!code){ await say('てもちが いない!'); continue; }
+      await showCode('きみの チームコードだ!',code);
+      await say('ともだちに おくると、きみの チームと たたかえる。');
+    } else {
+      const v=askCode('ともだちの チームコードを はりつけて ください');
+      if(!v) continue;
+      const team=decTeam(v);
+      if(!team){ sfx('no'); await say('コードが ただしくない みたいだ…'); continue; }
+      if(!alive().length){ await say('たたかえる モンスターが いない!'); continue; }
+      await say('ともだちの チーム ('+team.length+'ひき)が あらわれた!');
+      battle({trainer:{name:'ともだちの チーム',party:team,money:0,friendly:1,
+        win:['いい しょうぶだった!'],key:null}});
+      return;
+    }
+  }
+}
+
+/* ---------------- 2) ちょくせつ対戦 (WebRTC P2P) ---------------- */
+let net=null, netQ=[], netWait=null, nb=null;
+const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},
+                       {urls:'stun:stun1.l.google.com:19302'}]};
+function b64enc(u8){ let s=''; for(const x of u8) s+=String.fromCharCode(x); return btoa(s); }
+function b64dec(s){ const t=atob(s), u=new Uint8Array(t.length);
+  for(let i=0;i<t.length;i++) u[i]=t.charCodeAt(i); return u; }
+async function packSig(o){
+  const s=JSON.stringify({sdp:o.sdp,type:o.type});
+  if(window.CompressionStream){
+    try{
+      const cs=new CompressionStream('deflate-raw');
+      const buf=await new Response(new Blob([s]).stream().pipeThrough(cs)).arrayBuffer();
+      return 'Z'+b64enc(new Uint8Array(buf));
+    }catch(e){}
+  }
+  return 'R'+btoa(unescape(encodeURIComponent(s)));
+}
+async function unpackSig(str){
+  try{
+    str=(str||'').replace(/\s/g,'');
+    const tag=str[0], body=str.slice(1);
+    if(tag==='Z'&&window.DecompressionStream){
+      const ds=new DecompressionStream('deflate-raw');
+      const buf=await new Response(new Blob([b64dec(body)]).stream().pipeThrough(ds)).arrayBuffer();
+      return JSON.parse(new TextDecoder().decode(buf));
+    }
+    if(tag==='R') return JSON.parse(decodeURIComponent(escape(atob(body))));
+  }catch(e){}
+  return null;
+}
+function netClose(){
+  if(net){ try{ net.dc&&net.dc.close(); }catch(e){} try{ net.pc&&net.pc.close(); }catch(e){} }
+  net=null; netQ=[]; if(netWait){ const r=netWait; netWait=null; r(); }
+}
+function netSend(o){ try{ if(net&&net.dc&&net.dc.readyState==='open') net.dc.send(JSON.stringify(o)); }catch(e){} }
+function netHook(dc){
+  dc.onmessage=ev=>{ try{ netQ.push(JSON.parse(ev.data)); }catch(e){}
+    if(netWait){ const r=netWait; netWait=null; r(); } };
+  dc.onclose=dc.onerror=()=>{ if(net) net.dead=1;
+    if(netWait){ const r=netWait; netWait=null; r(); } };
+}
+async function netRecv(type,ms){
+  const t0=Date.now();
+  while(true){
+    const i=netQ.findIndex(m=>m.t===type);
+    if(i>=0) return netQ.splice(i,1)[0];
+    if(!net||net.dead) return null;
+    if(ms&&Date.now()-t0>ms) return null;
+    await new Promise(r=>{ netWait=r; setTimeout(()=>{ if(netWait===r){netWait=null;r();} },150); });
+  }
+}
+async function waitIce(pc){
+  if(pc.iceGatheringState==='complete') return;
+  await new Promise(r=>{
+    let done=false;
+    const fin=()=>{ if(done) return; done=true; clearTimeout(t);
+      pc.removeEventListener('icegatheringstatechange',h); r(); };
+    const h=()=>{ if(pc.iceGatheringState==='complete') fin(); };
+    const t=setTimeout(fin,4000);
+    pc.addEventListener('icegatheringstatechange',h);
+  });
+}
+async function netConnect(asHost){
+  let pc;
+  try{ pc=new RTCPeerConnection(ICE); }
+  catch(e){ await say('この ブラウザでは ちょくせつたいせんが つかえない…'); return false; }
+  net={pc,dc:null,host:asHost,dead:0};
+  let openRes; const opened=new Promise(r=>{ openRes=r; });
+  try{
+    if(asHost){
+      const dc=pc.createDataChannel('mq',{ordered:true});
+      net.dc=dc; netHook(dc); dc.onopen=()=>openRes(true);
+      await pc.setLocalDescription(await pc.createOffer());
+      await waitIce(pc);
+      await showCode('しょうたいコードを つくった!',await packSig(pc.localDescription));
+      const ans=askCode('ともだちから とどいた へんじの コードを はりつけて ください');
+      const d=await unpackSig(ans);
+      if(!d){ sfx('no'); await say('コードが ただしくない みたいだ…'); netClose(); return false; }
+      await pc.setRemoteDescription(d);
+    } else {
+      pc.ondatachannel=ev=>{ net.dc=ev.channel; netHook(net.dc);
+        net.dc.onopen=()=>openRes(true);
+        if(net.dc.readyState==='open') openRes(true); };
+      const off=askCode('しょうたいコードを はりつけて ください');
+      const d=await unpackSig(off);
+      if(!d){ sfx('no'); await say('コードが ただしくない みたいだ…'); netClose(); return false; }
+      await pc.setRemoteDescription(d);
+      await pc.setLocalDescription(await pc.createAnswer());
+      await waitIce(pc);
+      await showCode('へんじの コードが できた!',await packSig(pc.localDescription));
+      await say('これを ともだちに おくりかえしてね。');
+    }
+  }catch(e){ sfx('no'); await say('つなぐ じゅんびに しっぱいした…'); netClose(); return false; }
+  ui.text={full:'つないでいる…',n:8,done:true,name:null};
+  const ok=await Promise.race([opened,new Promise(r=>setTimeout(()=>r(false),30000))]);
+  ui.text=null;
+  if(!ok){
+    sfx('no'); await say('つながらなかった…');
+    await say('かいせんに よっては つながらないことが ある。');
+    await say('そのときは チームコードたいせんを つかってね!');
+    netClose(); return false;
+  }
+  sfx('catch'); await say('つながった!');
+  return true;
+}
+
+/* --- 対戦の進行。ホストが判定し、結果を出来事の列にして両者で再生する --- */
+const nbSide=s=>(s===nb.side?'me':'foe');
+function nbSync(){
+  bt.me=nb.team[nb.side][nb.act[nb.side]];
+  bt.foe=nb.team[1-nb.side][nb.act[1-nb.side]];
+  bt.dm=bt.me.hp; bt.df=bt.foe.hp;
+}
+function nbLabel(s){ return s===nb.side?nb.team[s][nb.act[s]].name:'あいての '+nb.team[s][nb.act[s]].name; }
+/* ホスト側: 両者の行動から出来事の列をつくる */
+function nbResolve(acts){
+  const ev=[];
+  const order=[0,1].filter(s=>acts[s]&&acts[s].k==='mv');
+  order.sort((a,b)=>{
+    const ma=MV[acts[a].mv], mb=MV[acts[b].mv];
+    const pa=ma.pr||0, pb=mb.pr||0;
+    if(pa!==pb) return pb-pa;
+    const A=nb.team[a][nb.act[a]], B=nb.team[b][nb.act[b]];
+    const sa=A.spd*(A.st==='まひ'?0.5:1), sb=B.spd*(B.st==='まひ'?0.5:1);
+    if(sa!==sb) return sb-sa;
+    return Math.random()<0.5?-1:1;
+  });
+  for(const s of [0,1]) if(acts[s]&&acts[s].k==='sw'){
+    ev.push({e:'sw',s,i:acts[s].i}); nb.act[s]=acts[s].i;
+    resetB(nb.team[s][acts[s].i]);
+  }
+  for(const s of order){
+    const A=nb.team[s][nb.act[s]], D=nb.team[1-s][nb.act[1-s]];
+    if(A.hp<=0||D.hp<=0) continue;
+    const key=acts[s].mv, m=MV[key];
+    const slot=A.mv.find(x=>x.k===key); if(slot) slot.pp=Math.max(0,slot.pp-1);
+    if(A.st==='ねむり'){
+      if(A.slp>0){ A.slp--; ev.push({e:'msg',m:'#'+s+'は ぐっすり ねむっている!'}); continue; }
+      A.st=null; ev.push({e:'msg',m:'#'+s+'は めを さました!'});
+    }
+    if(A.st==='まひ'&&Math.random()<0.25){ ev.push({e:'msg',m:'#'+s+'は からだが しびれて うごけない!'}); continue; }
+    ev.push({e:'use',s,mv:key});
+    if(m.ac>0&&Math.random()*100>m.ac){ ev.push({e:'msg',m:'しかし はずれた!'}); continue; }
+    if(m.hl){ const h=Math.min(A.max-A.hp,Math.floor(A.max*m.hl)); A.hp+=h;
+      ev.push({e:'hp',s,hp:A.hp},{e:'msg',m:'#'+s+'は たいりょくを かいふくした!'}); continue; }
+    if(m.sf){ A.bst[m.sf[0]]=clamp(A.bst[m.sf[0]]+m.sf[1],-6,6);
+      ev.push({e:'msg',m:'#'+s+'の '+(m.sf[0]==='atk'?'こうげき':'ぼうぎょ')+'が あがった!'}); continue; }
+    if(m.en){ D.bst[m.en[0]]=clamp(D.bst[m.en[0]]+m.en[1],-6,6);
+      ev.push({e:'msg',m:'#'+(1-s)+'の '+(m.en[0]==='atk'?'こうげき':'ぼうぎょ')+'が さがった!'}); continue; }
+    if(m.pw===0&&m.st){
+      if(D.st){ ev.push({e:'msg',m:'#'+(1-s)+'には こうかが なかった…'}); continue; }
+      D.st=m.st; if(m.st==='ねむり') D.slp=ri(1,3);
+      ev.push({e:'st',s:1-s,st:m.st}); continue;
+    }
+    const r=calcDmg(A,D,m);
+    D.hp=Math.max(0,D.hp-r.v);
+    ev.push({e:'dmg',s:1-s,ty:m.t,v:r.v,hp:D.hp,eff:r.e,crit:r.crit>1?1:0});
+    if(D.hp>0&&m.st&&!D.st&&Math.random()*100<(m.stc||0)){
+      D.st=m.st; if(m.st==='ねむり') D.slp=ri(1,3);
+      ev.push({e:'st',s:1-s,st:m.st});
+    }
+    if(D.hp<=0) ev.push({e:'faint',s:1-s});
+    if(A.hp<=0) ev.push({e:'faint',s});
+  }
+  for(const s of [0,1]){
+    const A=nb.team[s][nb.act[s]];
+    if(A.hp>0&&A.st==='どく'){
+      A.hp=Math.max(0,A.hp-Math.max(1,Math.floor(A.max/8)));
+      ev.push({e:'psn',s,hp:A.hp});
+      if(A.hp<=0) ev.push({e:'faint',s});
+    }
+  }
+  return ev;
+}
+/* 両者共通: 出来事の列を演出つきで再生する */
+async function nbPlay(ev){
+  for(const q of ev){
+    if(!nb) return;
+    const M2=m=>m.replace(/#0/g,nbLabel(0)).replace(/#1/g,nbLabel(1));
+    if(q.e==='sw'){
+      nb.act[q.s]=q.i; resetB(nb.team[q.s][q.i]); nbSync();
+      await say((q.s===nb.side?'ゆけっ! ':'あいては ')+nb.team[q.s][q.i].name+(q.s===nb.side?'!':'を くりだした!'));
+    } else if(q.e==='use'){
+      await say(nbLabel(q.s)+'の '+MV[q.mv].n+'!',{keep:true});
+      await sleep(260); moveSE(MV[q.mv].t);
+      await lunge(nbSide(q.s));
+      await playFx(MV[q.mv].t,nbSide(1-q.s)===  'me');
+      ui.text=null;
+    } else if(q.e==='dmg'){
+      sfx(q.crit?'crit':'hit');
+      const who=nbSide(q.s);
+      nb.team[q.s][nb.act[q.s]].hp=q.hp;
+      ui.flashScreen=q.crit?10:4;
+      await Promise.all([shake(who,q.eff>=2?6:4),tweenHp(who)]);
+      if(q.crit) await say('きゅうしょに あたった!');
+      if(q.eff===0) await say('こうかが ないようだ…');
+      else if(q.eff>1) await say('こうかは バツグンだ!');
+      else if(q.eff<1) await say('こうかは いまひとつの ようだ…');
+    } else if(q.e==='hp'){
+      nb.team[q.s][nb.act[q.s]].hp=q.hp; sfx('heal'); await tweenHp(nbSide(q.s));
+    } else if(q.e==='psn'){
+      nb.team[q.s][nb.act[q.s]].hp=q.hp; sfx('no');
+      await blink(nbSide(q.s),2); await tweenHp(nbSide(q.s));
+      await say(nbLabel(q.s)+'は どくで きずついた!');
+    } else if(q.e==='st'){
+      nb.team[q.s][nb.act[q.s]].st=q.st; sfx('no');
+      await blink(nbSide(q.s),3);
+      await say(nbLabel(q.s)+'は '+q.st+'に なった!');
+    } else if(q.e==='faint'){
+      nb.team[q.s][nb.act[q.s]].hp=0; sfx('faint');
+      await blink(nbSide(q.s),4);
+      bt.anim[nbSide(q.s)==='me'?'mh':'fh']=1;
+      await say(nbLabel(q.s)+'は たおれた!');
+    } else if(q.e==='msg'){
+      await say(M2(q.m));
+    }
+  }
+}
+async function nbMenu(){
+  while(true){
+    ui.prompt=bt.me.name+' どうする?';
+    const c=await choose(['たたかう','いれかえ','あきらめる'],
+      {x:98,y:99,w:59,cols:1,rowH:10,pad:6,size:8});
+    ui.prompt=null;
+    if(c===0){ const k=await moveMenu(); if(k) return {k:'mv',mv:k}; }
+    else if(c===1){
+      const mine=nb.team[nb.side];
+      const items=mine.map(m=>({t:m.name,r:'Lv'+m.lv+' '+m.hp+'/'+m.max,
+        col:m.hp<=0?'#8a8296':'#fff',mon:m.id}));
+      const i=await choose(items,{x:6,y:16,w:148,cols:1,title:'いれかえる モンスター',cancel:true,max:6});
+      if(i<0) continue;
+      if(mine[i].hp<=0){ await say(mine[i].name+'は たたかえない!'); continue; }
+      if(i===nb.act[nb.side]){ await say('すでに たたかっている!'); continue; }
+      return {k:'sw',i};
+    }
+    else { return {k:'gv'}; }
+  }
+}
+async function netBattle(asHost){
+  ui.busy=true; scene='battle';
+  const myTeam=battleClone(alive().length?G.party:G.party);
+  ui.text={full:'あいての チームを まっている…',n:20,done:true,name:null};
+  let rt=null;
+  for(let i=0;i<90&&!rt;i++){
+    netSend({t:'team',d:encTeam(G.party)});
+    rt=await netRecv('team',2000);
+    if(!net||net.dead) break;
+  }
+  ui.text=null;
+  const theirs=rt&&decTeam(rt.d);
+  if(!theirs){ await say('あいての チームを うけとれなかった…'); netClose(); scene='field'; ui.busy=false; return; }
+  const side=asHost?0:1;
+  nb={side,team:asHost?[myTeam,theirs]:[theirs,myTeam],act:[0,0]};
+  nb.team[0].concat(nb.team[1]).forEach(m=>{ if(!m.bst) resetB(m); });
+  bt={tr:{},ei:0,wild:false,anim:{md:0,fd:0,mh:0,fh:0},ball:null,intro:0,fx:null};
+  nbSync(); bgmPlay('boss');
+  for(let i=0;i<14;i++){ bt.intro=i/14; await sleep(28); }
+  bt.intro=1;
+  await say('ともだちとの しょうぶだ!');
+  await say('ゆけっ! '+bt.me.name+'!');
+  let result='';
+  while(true){
+    const act=await nbMenu();
+    if(act.k==='gv'){ netSend({t:'act',a:{k:'gv'}}); result='lose'; break; }
+    netSend({t:'act',a:act});
+    ui.text={full:'あいての こうどうを まっている…',n:20,done:true,name:null};
+    const rm=await netRecv('act',300000);
+    ui.text=null;
+    if(!rm){ result='dc'; break; }
+    if(rm.a.k==='gv'){ result='win'; break; }
+    const acts=[]; acts[side]=act; acts[1-side]=rm.a;
+    let ev;
+    if(asHost){ ev=nbResolve(acts); netSend({t:'ev',ev}); }
+    else { const em=await netRecv('ev',300000); if(!em){ result='dc'; break; } ev=em.ev; }
+    await nbPlay(ev);
+    nbSync();
+    /* 倒れたら次を出す。両者が選び終わるまで待ち合わせる */
+    const myDown=nb.team[side][nb.act[side]].hp<=0;
+    const myLeft=nb.team[side].some(m=>m.hp>0);
+    const foeLeft=nb.team[1-side].some(m=>m.hp>0);
+    if(!myLeft||!foeLeft){ result=!myLeft?(foeLeft?'lose':'draw'):'win'; break; }
+    if(myDown){
+      await say('つぎの モンスターを えらんで ください。');
+      let i=-1;
+      while(i<0){
+        const items=nb.team[side].map(m=>({t:m.name,r:'Lv'+m.lv+' '+m.hp+'/'+m.max,
+          col:m.hp<=0?'#8a8296':'#fff',mon:m.id}));
+        const p=await choose(items,{x:6,y:16,w:148,cols:1,title:'つぎの モンスター',max:6});
+        if(p>=0&&nb.team[side][p].hp>0) i=p; else sfx('no');
+      }
+      nb.act[side]=i; resetB(nb.team[side][i]); netSend({t:'next',i});
+      bt.anim.mh=0; nbSync();
+      await say('ゆけっ! '+bt.me.name+'!');
+    }
+    if(nb.team[1-side][nb.act[1-side]].hp<=0){
+      ui.text={full:'あいてが えらんでいる…',n:16,done:true,name:null};
+      const nx=await netRecv('next',300000);
+      ui.text=null;
+      if(!nx){ result='dc'; break; }
+      nb.act[1-side]=nx.i; resetB(nb.team[1-side][nx.i]); bt.anim.fh=0; nbSync();
+      await say('あいては '+bt.foe.name+'を くりだした!');
+    }
+  }
+  for(let i=14;i>=0;i--){ bt.intro=i/14; await sleep(24); }
+  bt=null; nb=null; scene='field'; ui.text=null;
+  bgmSync();
+  if(result==='win'){ sfx('lvl'); await say('ともだちに かった!'); }
+  else if(result==='lose') await say('ともだちに まけてしまった…');
+  else if(result==='draw') await say('ひきわけだ!');
+  else await say('つうしんが とぎれてしまった…');
+  await say('※ つうしんたいせんは ぼうけんの きろくに えいきょう しません。');
+  netClose(); ui.busy=false;
+}
+async function netMenu(){
+  while(true){
+    const c=await choose(['しょうたいする (ホスト)','しょうたいコードで さんか','もどる'],
+      {x:6,y:44,w:148,cols:1,cancel:true,title:'ちょくせつ たいせん'});
+    if(c<0||c===2) return;
+    if(!alive().length){ await say('たたかえる モンスターが いない!'); continue; }
+    if(await netConnect(c===0)){ await netBattle(c===0); return; }
+  }
+}
+async function commsMenu(){
+  while(true){
+    const c=await choose(['チームコード たいせん','ちょくせつ たいせん','もどる'],
+      {x:8,y:44,w:144,cols:1,cancel:true,title:'つうしん'});
+    if(c<0||c===2) return;
+    if(c===0) await codeBattleMenu();
+    else await netMenu();
+    if(scene!=='field'||!ui.busy) return;
+  }
+}
+
 /* ---- スタートメニュー ---- */
 async function openMenu(){
   ui.busy=true;
   let run=true;
   while(run){
     const box=G.box.length?'ボックス('+G.box.length+')':'ボックス';
-    const c=await choose(['モンスター',box,'どうぐ','バッジ','ずかん','セーブ','とじる'],
-      {x:96,y:8,w:60,cols:1,cancel:true});
-    if(c<0||c===6) break;
+    const c=await choose(['モンスター',box,'どうぐ','バッジ','ずかん','つうしん','セーブ','とじる'],
+      {x:94,y:6,w:62,cols:1,cancel:true});
+    if(c<0||c===7) break;
     if(c===0) await partyScreen();
     else if(c===1) await boxScreen();
     else if(c===2) await bagField();
     else if(c===3) await badgeScreen();
     else if(c===4) await dexScreen();
-    else if(c===5){
+    else if(c===5){ await commsMenu(); if(scene!=='field') break; }
+    else if(c===6){
       await say('ぼうけんの きろくを セーブしますか?',{keep:true});
       const y=await choose(['はい','いいえ'],{x:104,y:66,w:50,cols:1,cancel:true});
       ui.text=null;
