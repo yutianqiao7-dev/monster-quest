@@ -340,7 +340,7 @@ function bgmTick(){
 }
 function wantBgm(){
   if(scene==='title') return 'title';
-  if(scene==='battle') return (bt&&bt.tr)?'boss':'battle';
+  if(scene==='battle') return (bt&&(bt.tr||bt.leg))?'boss':'battle';
   if(scene==='field'&&G) return MAPBGM[G.map]||'town';
   return null;
 }
@@ -534,7 +534,17 @@ const SP={
   awabee:{n:'アワビー',t:'みず',b:[54,44,66,30],x:64,cr:190,ev:['ooawabi',30],c:['#12304a','#6fc0d8','#3a7e9c','#c0f0ff','#f0c060','#ffffff'],
     lv:[[1,'tackle'],[1,'harden'],[9,'wgun'],[16,'bubble'],[24,'wave'],[32,'hydro']]},
   ooawabi:{n:'オオアワビ',t:'みず',b:[88,70,110,36],x:180,cr:70,c:['#0d2740','#4fa0c0','#26637e','#a8e0f8','#f0b840','#ffffff'],
-    lv:[[1,'tackle'],[1,'harden'],[16,'bubble'],[26,'wave'],[34,'hydro'],[42,'blast']]}
+    lv:[[1,'tackle'],[1,'harden'],[16,'bubble'],[26,'wave'],[34,'hydro'],[42,'blast']]},
+  daichi:{n:'ダイチノヌシ',t:'いわ',b:[100,105,130,45],x:240,cr:3,c:['#241d18','#8c7a5e','#584a36','#c8b492','#5fc0a0','#ffffff'],
+    lv:[[1,'rock'],[1,'harden'],[30,'blast'],[40,'slam'],[50,'sharpen'],[58,'bodyguard']]},
+  ryugaio:{n:'リュウガイオ',t:'ほのお',b:[105,130,95,90],x:250,cr:3,c:['#4a1206','#ff6a22','#b83a08','#ffc070','#ffe040','#ffffff'],
+    lv:[[1,'ember'],[1,'quick'],[30,'fang'],[40,'flame'],[50,'sharpen'],[58,'slam']]},
+  kaioujin:{n:'カイオウジン',t:'みず',b:[115,110,115,70],x:245,cr:3,c:['#07162e','#2f74c8','#123f78','#8fc8ff','#40f0d0','#ffffff'],
+    lv:[[1,'wgun'],[1,'harden'],[30,'bubble'],[40,'hydro'],[50,'blast'],[58,'slam']]},
+  tenkushin:{n:'テンクウシン',t:'ひこう',b:[105,120,100,125],x:255,cr:3,c:['#1c1a2e','#d8e0f8','#8d95b8','#ffffff','#f0a030','#ffffff'],
+    lv:[[1,'peck'],[1,'quick'],[30,'wing'],[40,'air'],[50,'sharpen'],[58,'blast']]},
+  sekaio:{n:'セカイオー',t:'ノーマル',b:[130,135,125,110],x:300,cr:2,c:['#2a2418','#f8e8b0','#b8a060','#fffce8','#c060e0','#ffffff'],
+    lv:[[1,'slam'],[1,'harden'],[30,'bodyguard'],[45,'blast'],[55,'air'],[65,'hydro']]}
 };
 const DEXORDER=Object.keys(SP);
 
@@ -906,6 +916,91 @@ tenkuga:[
 "...0000000000...",
 "....044..440....",
 "................"],
+daichi:[
+"..4..........4..",
+"..44...44...44..",
+".0440.0440.0440.",
+"00440044400440 0",
+"0044444444444400",
+"0431111111111340",
+"0431166116611340",
+"0431167116711340",
+"0431111771111340",
+"0433111111113340",
+"0443333333333440",
+"0444333333334440",
+".04444444444440.",
+"..000000000000..",
+"..000......000..",
+"..00........00.."],
+ryugaio:[
+"..4...4..4...4..",
+"..44.44..44.44..",
+".444444..444444.",
+"04444400004444 0",
+"0044411111144400",
+"0441166116611440",
+"0441167116711440",
+"0441111771111440",
+"0441133333311440",
+"4441333333331444",
+"4443333333333444",
+"44403333333304 4",
+".044011111104 0.",
+"..0000000000 0..",
+"..0440....0440..",
+"..44........44.."],
+kaioujin:[
+"....4......4....",
+"...444....444...",
+"..44444444444...",
+".04444444444440.",
+"04431111111134 0",
+"0431166116611340",
+"0431167116711340",
+"0431111111111340",
+"4431111771111344",
+"4433333333333344",
+"4443333333333444",
+"44433333333334 4",
+".44411111111444.",
+"..0000000000 0..",
+"..444......444..",
+"...44........44."],
+tenkushin:[
+"...4..4444..4...",
+"..44.044440.44..",
+".4440044444004 4",
+"44400111111004 4",
+"4400116611660044",
+"400116711671 004",
+"40011117711100 4",
+"400111111111000 ",
+"4401113333111044",
+"4441133333311444",
+"4443333333333444",
+"0443333333333440",
+"..0111111111 0..",
+"...0000000000...",
+"...044....440...",
+"...4........4..."],
+sekaio:[
+"..4..4....4..4..",
+"..44.44..44.44..",
+".444044444404 4.",
+"44404444444404 4",
+"4400443333440044",
+"400443311334 004",
+"40043116611 3004",
+"40043116711 3004",
+"40043111771 3004",
+"400433333333 004",
+"4400333333330044",
+"44403333333304 4",
+".444011111104 4.",
+"..0000000000 0..",
+"..0440....0440..",
+"..44........44.."],
 kororin:[
 "................",
 "....00000000....",
@@ -1275,7 +1370,7 @@ function drawSpr(cv,x,y,sc,flip,ctx){
 }
 /* ============================ マップ ============================ */
 /* w 屋内壁 / A B C スイッチ扉 / G トレーナー扉 / O 押せる岩 */
-const SOLID='TWHS#_LwABCGOb!';
+const SOLID='TWHS#_LwABCGOb!';   /* X(祭壇の入口) と D(扉) はワープなので通す */
 /* ジムバッジ。順にクリアしていくと次のエリアの門が開く */
 const BADGES=[
   {id:'midori',n:'みどりバッジ',town:'セイリュウシティ',leader:'ソウマ',t:'むし'},
@@ -1547,7 +1642,7 @@ cave:{name:'イワクラどうくつ',rows:["________~~__________",
 "_~~____~~__~~____~~_",
 "_~~____~~__~~____~~_",
 "_~~~~~~~~__~!~~~~~~_",
-"_~~~~~~~~~~~~~~~~~~_",
+"_~~~~~~~~~~~~~~~~~X_",
 "_~~____~~~~~~____~~_",
 "_~~____~~~~~~____~~_",
 "_~~~~~~~~~~~!~~~~~~_",
@@ -1559,7 +1654,7 @@ cave:{name:'イワクラどうくつ',rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
 ground:'~',items:{'12,8':'revive','12,12':'ether'},
-warps:[{x:8,y:19,to:'route3',tx:24,ty:1},{x:9,y:19,to:'route3',tx:24,ty:1},
+warps:[{x:18,y:9,to:'lair_daichi',tx:6,ty:6},{x:8,y:19,to:'route3',tx:24,ty:1},{x:9,y:19,to:'route3',tx:24,ty:1},
        {x:8,y:0,to:'hinata',tx:9,ty:17},{x:9,y:0,to:'hinata',tx:9,ty:17}],
 npcs:[
  {x:16,y:9,pal:'boy',dir:'left',nm:'たんこうふ',
@@ -1574,8 +1669,7 @@ signs:{},
 encTile:'~',encRate:0.09,
 enc:{lv:[16,21],list:[['iwagoro',30],['gansekio',8],['mushikoro',12],['oononezu',20],['biritto',15],['kabutoga',15]]}},
 
-hinata:{name:'ヒナタ港町',rows:[
-"TTTTTTTTTRTTTTTTTTTT",
+hinata:{name:'ヒナタ港町',rows:["TTTTTTTTTRTTTTTTTTTT",
 "T........R.........T",
 "T..HHHHH...HHHHH...T",
 "T..HHHHH...HHHHH...T",
@@ -1586,7 +1680,7 @@ hinata:{name:'ヒナタ港町',rows:[
 "T....HHHHHHHH......T",
 "T....HHHYHHHH......T",
 "T........RR.S......T",
-"T........RR........T",
+"T........RR......X.T",
 "TWWWWW...RR...WWWWWT",
 "TWWWWW...RR...WWWWWT",
 "TWWWWW...RR...WWWWWT",
@@ -1595,7 +1689,7 @@ hinata:{name:'ヒナタ港町',rows:[
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
 fish:{lv:[18,26],list:[['awabee',30],['pukari',25],['shizuku',15],['uzushio',12],['ooawabi',10],['shinkaio',8]]},
-warps:[{x:9,y:18,to:'cave',tx:8,ty:1},{x:10,y:18,to:'cave',tx:8,ty:1},
+warps:[{x:17,y:11,to:'lair_kaiou',tx:6,ty:6},{x:9,y:18,to:'cave',tx:8,ty:1},{x:10,y:18,to:'cave',tx:8,ty:1},
        {x:9,y:0,to:'route4',tx:9,ty:18},
        {x:8,y:9,to:'hinatagym',tx:9,ty:9}],
 npcs:[
@@ -1902,7 +1996,7 @@ kazan:{name:'カザン洞',rows:["________~~__________",
 "_~~LL~~~~__~~~~LL~~_",
 "_~~LL~~~~__~~~~LL~~_",
 "_~!~~~~~~__~~~~~~~~_",
-"_~~~~~~~~~~~~~~~~~~_",
+"_~~~~~~~~~~~~~~~~~X_",
 "_~~LLLL~~~~~~LLLL~~_",
 "_~~LLLL~~~~~~LLLL~~_",
 "_~~~~~~~~~~~!~~~~~~_",
@@ -1914,7 +2008,7 @@ kazan:{name:'カザン洞',rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
 ground:'~',items:{'2,8':'mrevive','12,12':'uball'},
-warps:[{x:8,y:19,to:'route6',tx:24,ty:1},{x:9,y:19,to:'route6',tx:24,ty:1},
+warps:[{x:18,y:9,to:'lair_ryuga',tx:6,ty:6},{x:8,y:19,to:'route6',tx:24,ty:1},{x:9,y:19,to:'route6',tx:24,ty:1},
        {x:8,y:0,to:'kazanmachi',tx:9,ty:17},{x:9,y:0,to:'kazanmachi',tx:9,ty:17}],
 npcs:[
  {x:16,y:9,pal:'shop',dir:'left',nm:'ようがんつかい',
@@ -2115,8 +2209,7 @@ npcs:[
 signs:{'15,16':'かんばん:「きた ↑ ソラミ台 / みなみ ↓ ミドリ台」'},
 enc:{lv:[38,44],list:[['hanemimi',18],['kazekiri',12],['tenkuga',14],['mokomoko',16],['gigakuwaga',12],['enblaze',12],['hikarigoke',16]]}},
 
-sorami:{name:'ソラミ台',rows:[
-"TTTTTTTTTRTTTTTTTTTT",
+sorami:{name:'ソラミ台',rows:["TTTTTTTTTRTTTTTTTTTT",
 "T........R.........T",
 "T..HHHHH...HHHHH...T",
 "T..HHHHH...HHHHH...T",
@@ -2127,7 +2220,7 @@ sorami:{name:'ソラミ台',rows:[
 "T....HHHHHHHH......T",
 "T....HHHYHHHH......T",
 "T........RR.S......T",
-"T........RR........T",
+"T..X.....RR........T",
 "T..####..RR..####..T",
 "T..####..RR..####..T",
 "T........RR........T",
@@ -2135,7 +2228,7 @@ sorami:{name:'ソラミ台',rows:[
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
-warps:[{x:9,y:18,to:'route8',tx:9,ty:1},{x:10,y:18,to:'route8',tx:10,ty:1},
+warps:[{x:3,y:11,to:'lair_tenku',tx:6,ty:6},{x:9,y:18,to:'route8',tx:9,ty:1},{x:10,y:18,to:'route8',tx:10,ty:1},
        {x:9,y:0,to:'route9',tx:9,ty:18},
        {x:8,y:9,to:'soramigym',tx:9,ty:9}],
 npcs:[
@@ -2305,7 +2398,7 @@ chroad:{name:'チャンピオンロード',puz:1,rows:["________~~__________",
 "_~~LL~~~_~~~~~~LL~~_",
 "_~~LL~~~_~~~~~~LL~~_",
 "_~!~~~~~O~~~~~~~~~~_",
-"_~~~~~~~~~~~~~~~~~~_",
+"_~~~~~~~~~~~~~~~~~X_",
 "_~~LLLL~~~~~~LLLL~~_",
 "_~~LLLL~~~~~~LLLL~~_",
 "_~~~~~~~~~!~~~~~~~~_",
@@ -2317,7 +2410,7 @@ chroad:{name:'チャンピオンロード',puz:1,rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
 ground:'~',items:{'2,8':'candy','10,12':'mrevive'},
-warps:[{x:8,y:19,to:'owari',tx:9,ty:1},{x:9,y:19,to:'owari',tx:9,ty:1},
+warps:[{x:18,y:9,to:'lair_sekai',tx:6,ty:6},{x:8,y:19,to:'owari',tx:9,ty:1},{x:9,y:19,to:'owari',tx:9,ty:1},
        {x:8,y:0,to:'hall',tx:9,ty:12},{x:9,y:0,to:'hall',tx:9,ty:12}],
 npcs:[
  {x:16,y:9,pal:'rival',dir:'left',nm:'リーグしぼうしゃ',
@@ -2478,6 +2571,92 @@ npcs:[
 signs:{},
 enc:null},
 
+lair_daichi:{name:'だいちの ま',ground:'~',rows:[
+"_____________",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~X~~~~~_",
+"_____________"],
+warps:[{x:6,y:7,to:'cave',tx:18,ty:10}],
+npcs:[
+ {x:6,y:3,mon:'daichi',nm:'daichi',hide:'leg_lair_daichi',
+  legend:{id:'daichi',lv:52,flag:'leg_lair_daichi',pre:['ずしん…と じめんが ゆれた。','いわの おくから なにかが おきあがる ——']}}
+],
+signs:{},enc:null,indoor:1},
+lair_ryuga:{name:'ようがんの ま',ground:'~',rows:[
+"_____________",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~X~~~~~_",
+"_____________"],
+warps:[{x:6,y:7,to:'kazan',tx:18,ty:10}],
+npcs:[
+ {x:6,y:3,mon:'ryugaio',nm:'ryugaio',hide:'leg_lair_ryuga',
+  legend:{id:'ryugaio',lv:55,flag:'leg_lair_ryuga',pre:['ねっぷうが ふきあがった。','ようがんの なかから なにかが みあげてくる ——']}}
+],
+signs:{},enc:null,indoor:1},
+lair_kaiou:{name:'かいていの ま',ground:'~',rows:[
+"_____________",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~X~~~~~_",
+"_____________"],
+warps:[{x:6,y:7,to:'hinata',tx:17,ty:11}],
+npcs:[
+ {x:6,y:3,mon:'kaioujin',nm:'kaioujin',hide:'leg_lair_kaiou',
+  legend:{id:'kaioujin',lv:55,flag:'leg_lair_kaiou',pre:['しおの においが こくなった。','ふかい みずの そこから なにかが うかびあがる ——']}}
+],
+signs:{},enc:null,indoor:1},
+lair_tenku:{name:'そらの さいだん',ground:'~',rows:[
+"_____________",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~X~~~~~_",
+"_____________"],
+warps:[{x:6,y:7,to:'sorami',tx:3,ty:11}],
+npcs:[
+ {x:6,y:5,pal:'boy',dir:'down',nm:'ふういんの まもりびと',gate:{flag:'allbadge'},open:[3,0],
+  say:['この おくには ふるい ちからが ねむっている。','まだ きみには はやい。'],
+  say2:['きみなら もう だいじょうぶだろう。','…きを つけてな。']},
+ {x:6,y:3,mon:'tenkushin',nm:'tenkushin',hide:'leg_lair_tenku',
+  legend:{id:'tenkushin',lv:58,flag:'leg_lair_tenku',pre:['かぜが ぴたりと やんだ。','くもの きれまから なにかが まいおりる ——']}}
+],
+signs:{},enc:null,indoor:1},
+lair_sekai:{name:'せかいの はて',ground:'~',rows:[
+"_____________",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~X~~~~~_",
+"_____________"],
+warps:[{x:6,y:7,to:'chroad',tx:18,ty:10}],
+npcs:[
+ {x:6,y:5,pal:'boy',dir:'down',nm:'ふういんの まもりびと',gate:{flag:'champion'},open:[3,0],
+  say:['この おくには ふるい ちからが ねむっている。','まだ きみには はやい。'],
+  say2:['きみなら もう だいじょうぶだろう。','…きを つけてな。']},
+ {x:6,y:3,mon:'sekaio',nm:'sekaio',hide:'leg_lair_sekai',
+  legend:{id:'sekaio',lv:70,flag:'leg_lair_sekai',pre:['くうかんが ゆがんでいる。','この せかいの はじまりから いる なにかが ——']}}
+],
+signs:{},enc:null,indoor:1},
 /* --- ジム6 くさ: 生垣の迷路。トレーナー全員を倒すと最奥の扉が開く --- */
 midorigym:{name:'ミドリジム',puz:1,rows:[
 "wwwwwwwwwwwwwwwwwwww",
@@ -2759,6 +2938,16 @@ function drawTile(ch,px_,py,wx,wy){
       g.fillStyle='#ffa828'; g.fillRect(px_+3+o,py+4,6,3); g.fillRect(px_+10-o,py+11,4,2);
       g.fillStyle='#ffe860'; g.fillRect(px_+5+o,py+5,3,1);
       break;}
+    case 'X':{                                       /* 祭壇への いりぐち */
+      const gr2=M().ground||'.';
+      drawTile(gr2,px_,py,wx,wy);
+      g.fillStyle='#241d30'; g.fillRect(px_+1,py+2,14,14);
+      g.fillStyle='#4a3f68'; g.fillRect(px_+2,py+3,12,3);
+      g.fillStyle='#0c0a14'; g.fillRect(px_+3,py+6,10,10);
+      const gl=(Math.sin(tick/18)*0.5+0.5);
+      g.fillStyle='rgba(180,140,255,'+(0.25+gl*0.5).toFixed(2)+')';
+      g.fillRect(px_+5,py+8,6,6);
+      break;}
     case 'b':                                        /* 家具 */
       g.fillStyle='#5c5470'; g.fillRect(px_,py,16,16);
       g.fillStyle='#8a6a44'; g.fillRect(px_+1,py+3,14,10);
@@ -2871,7 +3060,8 @@ function tileAt(mp,x,y){
   return c;
 }
 /* 門番はバッジを見せると脇へどく。倒したトレーナーは hide フラグで消える */
-const npcOpen=n=>!!(n.gate&&hasBadge(n.gate.badge));
+const npcOpen=n=>!!(n.gate&&(n.gate.badge?hasBadge(n.gate.badge)
+                            :n.gate.flag?G.flags[n.gate.flag]:false));
 const npcGone=n=>!!(n.hide&&G.flags[n.hide]);
 function npcXY(n){ return (npcOpen(n)&&n.open)?[n.x+n.open[0],n.y+n.open[1]]:[n.x,n.y]; }
 function npcAt(mp,x,y){
@@ -2971,6 +3161,14 @@ async function talk(n){
     ui.busy=false; return;
   }
   if(n.shop){ await shop(n); ui.busy=false; return; }
+  if(n.legend){
+    if(!alive().length){ await say('たたかえる モンスターが いない!'); ui.busy=false; return; }
+    for(const l of n.legend.pre) await say(l);
+    await say(SP[n.legend.id].n+'が たちふさがった!');
+    ui.busy=false;
+    battle({wild:mk(n.legend.id,n.legend.lv),legend:n.legend.flag});
+    return;
+  }
   if(n.gift&&!G.flags[n.gift.flag]){
     for(const l of (n.say||[])) await say(l,{name:n.nm});
     await say(n.gift.msg,{name:n.nm});
@@ -3034,7 +3232,10 @@ function drawField(){
     if(npcGone(n)) continue;
     const q=npcXY(n), nx=q[0]*16, ny=q[1]*16;
     ents.push({y:ny,draw:()=>{
-      drawSpr(heroSpr(n.pal,n.dir),nx-cam.x,ny-cam.y-2,1,n.dir==='left');
+      if(n.mon){
+        const bob=Math.sin(tick/22)*1.5;
+        drawSpr(monSpr(n.mon),nx-cam.x,ny-cam.y-3+bob,1,false);
+      } else drawSpr(heroSpr(n.pal,n.dir),nx-cam.x,ny-cam.y-2,1,n.dir==='left');
       if(n.trainer && !G.flags['t_'+G.map+'_'+n.x+'_'+n.y]){
         const b=Math.sin(tick/9)*1.5;
         p.fillStyle='#fff'; p.fillRect(nx-cam.x+7,ny-cam.y-12+b,2,5); p.fillRect(nx-cam.x+7,ny-cam.y-6+b,2,2);
@@ -3242,8 +3443,8 @@ async function battle(o){
   const friendly=isTr&&o.trainer.friendly;
   /* 友達戦は本編に一切影響させない。開始前の状態を控えて終了時に戻す */
   const snap=friendly?G.party.map(m=>({hp:m.hp,st:m.st,slp:m.slp,pp:m.mv.map(s=>s.pp)})):null;
-  bgmPlay(isTr?'boss':'battle');
-  bt={tr:o.trainer||null, ei:0, wild:!isTr,
+  bgmPlay((isTr||o.legend)?'boss':'battle');
+  bt={tr:o.trainer||null, leg:!!o.legend, ei:0, wild:!isTr,
       foe:isTr?o.trainer.party[0]:o.wild, me:alive()[0],
       anim:{md:0,fd:0,mh:0,fh:0}, ball:null, intro:0};
   resetB(bt.me); resetB(bt.foe);
@@ -3331,6 +3532,13 @@ async function battle(o){
   }
   for(let i=14;i>=0;i--){ bt.intro=i/14; await sleep(24); }
   bt=null; scene='field'; ui.busy=false; ui.text=null; bgmSync();
+  if(o.legend&&(result==='win'||result==='caught')){
+    G.flags[o.legend]=1;
+    ui.busy=true;
+    if(result==='win') await say('…その すがたは きえて しまった。');
+    else await say('でんせつの モンスターを てに いれた!');
+    save(); ui.busy=false;
+  }
   if(friendly){
     ui.busy=true;
     G.party.forEach((m,i)=>{ const q=snap[i]; if(!q) return;
