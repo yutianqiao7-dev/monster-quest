@@ -522,7 +522,19 @@ const SP={
   shinkaio:{n:'シンカイオー',t:'みず',b:[100,92,100,58],x:205,cr:25,c:['#0a1a3a','#3f7fd0','#1e4a88','#8fc0ff','#40e0c0','#ffffff'],
     lv:[[1,'tackle'],[1,'wgun'],[20,'bubble'],[30,'hydro'],[40,'blast'],[48,'slam']]},
   soutenoh:{n:'ソウテンオー',t:'ひこう',b:[100,110,90,105],x:250,cr:8,c:['#2a1c10','#fff0c0','#c8a860','#fffce8','#e05030','#ffffff'],
-    lv:[[1,'peck'],[1,'quick'],[25,'wing'],[35,'sharpen'],[45,'air'],[55,'slam']]}
+    lv:[[1,'peck'],[1,'quick'],[25,'wing'],[35,'sharpen'],[45,'air'],[55,'slam']]},
+  kororin:{n:'コロリン',t:'ノーマル',b:[52,42,46,50],x:54,cr:200,c:['#3a3020','#e8c89a','#a89068','#fff0d8','#e07070','#ffffff'],
+    lv:[[1,'tackle'],[1,'harden'],[7,'tail'],[13,'quick'],[20,'slam'],[28,'bodyguard']]},
+  mogurin:{n:'モグリン',t:'いわ',b:[48,58,60,34],x:60,cr:190,c:['#2e2820','#a08868','#6a5840','#d0bc98','#e8a860','#ffffff'],
+    lv:[[1,'tackle'],[1,'harden'],[8,'rock'],[15,'tail'],[22,'blast'],[30,'slam']]},
+  watahoshi:{n:'ワタホシ',t:'くさ',b:[50,40,52,58],x:58,cr:190,c:['#22401f','#a8e878','#5c9c48','#e0ffc0','#f0e070','#ffffff'],
+    lv:[[1,'tackle'],[1,'growl'],[8,'leaf'],[14,'toxic'],[21,'synth'],[29,'solar']]},
+  hinowa:{n:'ヒノワ',t:'ほのお',b:[46,60,42,64],x:62,cr:180,c:['#4a1a0c','#ff9040','#c05010','#ffd090','#ffe850','#ffffff'],
+    lv:[[1,'scratch'],[1,'ember'],[9,'quick'],[16,'fang'],[24,'sharpen'],[32,'flame']]},
+  awabee:{n:'アワビー',t:'みず',b:[54,44,66,30],x:64,cr:190,ev:['ooawabi',30],c:['#12304a','#6fc0d8','#3a7e9c','#c0f0ff','#f0c060','#ffffff'],
+    lv:[[1,'tackle'],[1,'harden'],[9,'wgun'],[16,'bubble'],[24,'wave'],[32,'hydro']]},
+  ooawabi:{n:'オオアワビ',t:'みず',b:[88,70,110,36],x:180,cr:70,c:['#0d2740','#4fa0c0','#26637e','#a8e0f8','#f0b840','#ffffff'],
+    lv:[[1,'tackle'],[1,'harden'],[16,'bubble'],[26,'wave'],[34,'hydro'],[42,'blast']]}
 };
 const DEXORDER=Object.keys(SP);
 
@@ -894,6 +906,108 @@ tenkuga:[
 "...0000000000...",
 "....044..440....",
 "................"],
+kororin:[
+"................",
+"....00000000....",
+"..003333333300..",
+".03311111111330.",
+"0331111111111330",
+"0311661111661130",
+"0311671111671130",
+"0311111771111130",
+"0311133333311130",
+"0331333333331330",
+".03313333331330.",
+"..0331111133 0..",
+"...0011111100...",
+"....00000000....",
+"....0110.0110...",
+"................"],
+mogurin:[
+"................",
+".....000000.....",
+"...0011111100...",
+"..011111111110..",
+".01111111111110.",
+".01166111166110.",
+".01167111167110.",
+".01111177111110.",
+".01113333331110.",
+"..011333333110..",
+"...0011111100...",
+"...0000000000...",
+"..044......440..",
+"..44........44..",
+"................",
+"................"],
+watahoshi:[
+".......4........",
+"......444.......",
+".....44.44......",
+"....00000000....",
+"..003333333300..",
+".03311111111330.",
+"0331166116611330",
+"0331167116711330",
+"0331111111111330",
+"0333111111113330",
+".03331111133330.",
+"..0033333333 0..",
+"...0011111100...",
+"....00000000....",
+"...44......44...",
+"................"],
+hinowa:[
+".......4........",
+"......44........",
+"..0...444...0...",
+"..00.04440.00...",
+"..040044440 40..",
+"...0044444400...",
+"..044111111440..",
+".04411111111440.",
+"04411661166114 0",
+"04411671167114 0",
+"0441111771111440",
+".04411333311440.",
+"..004411114400..",
+"....00000000....",
+"....0440.0440...",
+"................"],
+awabee:[
+"................",
+"....44444444....",
+"..044444444440..",
+".04433333333440.",
+"04431111111134 0",
+"0431166116611340",
+"0431167116711340",
+"0431111111111340",
+"0433111111113340",
+"04433333333 3340",
+".04433333333440.",
+"..044444444440..",
+"...0000000000...",
+"..0011111111 0..",
+"...0000000000...",
+"................"],
+ooawabi:[
+"...4........4...",
+"..444444444444..",
+".04444444444440.",
+"04443333333344 0",
+"0443111111113440",
+"0431166116611340",
+"0431167116711340",
+"0431111111111340",
+"0431111771111340",
+"0433111111113340",
+"0443333333333440",
+"04443333333344 0",
+".04444444444440.",
+"..0011111111 0..",
+"..0000000000 0..",
+"...00......00..."],
 hanemimi:[
 "..0..........0..",
 "..00........00..",
@@ -1161,7 +1275,7 @@ function drawSpr(cv,x,y,sc,flip,ctx){
 }
 /* ============================ マップ ============================ */
 /* w 屋内壁 / A B C スイッチ扉 / G トレーナー扉 / O 押せる岩 */
-const SOLID='TWHDS#_LwABCGO';
+const SOLID='TWHS#_LwABCGOb!';
 /* ジムバッジ。順にクリアしていくと次のエリアの門が開く */
 const BADGES=[
   {id:'midori',n:'みどりバッジ',town:'セイリュウシティ',leader:'ソウマ',t:'むし'},
@@ -1211,8 +1325,7 @@ npcs:[
 signs:{'16,8':'かんばん:「ハジマリの町 —— ぼうけんは ここから」'},
 enc:null},
 
-route1:{name:'ルート1',bgm:2,rows:[
-"TTTTTTTTTRRTTTTTTTTT",
+route1:{name:'ルート1',bgm:2,rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T.,,,,...RR...,,,,.T",
 "T.,,,,...RR...,,,,.T",
@@ -1224,7 +1337,7 @@ route1:{name:'ルート1',bgm:2,rows:[
 "T..,,,,..RR........T",
 "T..,,,,..RR..#####.T",
 "T..,,,,..RR..#####.T",
-"T........RR........T",
+"T........RR...!....T",
 "TWWWWW...RR........T",
 "TWWWWW...RR..,,,,,.T",
 "TWWWWW...RR..,,,,,.T",
@@ -1234,6 +1347,8 @@ route1:{name:'ルート1',bgm:2,rows:[
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+fish:{lv:[3,8],list:[['awabee',40],['pukari',35],['shizuku',25]]},
+ground:'.',items:{'14,12':'potion'},
 warps:[{x:9,y:21,to:'town',tx:9,ty:1},{x:10,y:21,to:'town',tx:10,ty:1},
        {x:9,y:0,to:'forest',tx:9,ty:18},{x:10,y:0,to:'forest',tx:10,ty:18}],
 npcs:[
@@ -1283,8 +1398,7 @@ npcs:[
 signs:{},
 enc:{lv:[8,13],list:[['mushikoro',18],['kabutoga',14],['chunpi',14],['sorahane',8],['iwagoro',14],['biritto',12],['honomera',10],['oononezu',10]]}},
 
-route2:{name:'ルート2',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
+route2:{name:'ルート2',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T..,,,,..RR..,,,,..T",
 "T..,,,,..RR..,,,,..T",
@@ -1292,18 +1406,20 @@ route2:{name:'ルート2',rows:[
 "T........RR........T",
 "T..TTTT..RR........T",
 "T..TTTT..RR....S...T",
-"T........RR........T",
+"T........RR....!...T",
 "T........RRRRRR....T",
 "T........RR...RR...T",
 "T..,,,,..RR...RR...T",
 "T..,,,,..RR...RR...T",
 "T..,,,,..RR...RR...T",
-"T........RR...RR...T",
+"T......!.RR...RR...T",
 "TWWWW....RR........T",
 "TWWWW....RR........T",
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+fish:{lv:[8,14],list:[['awabee',38],['pukari',32],['shizuku',30]]},
+ground:'.',items:{'15,8':'gball','7,14':'antidote'},
 warps:[{x:9,y:19,to:'forest',tx:9,ty:2},{x:10,y:19,to:'forest',tx:9,ty:2},
        {x:9,y:0,to:'seiryu',tx:9,ty:17},{x:10,y:0,to:'seiryu',tx:10,ty:17}],
 npcs:[
@@ -1394,13 +1510,12 @@ signs:{},
 enc:null},
 
 /* --- 東西に走る道。セイリュウの東門から入り、東の端で北へ抜ける --- */
-route3:{name:'ルート3',rows:[
-"TTTTTTTTTTTTTTTTTTTTTTTTRRTTTT",
+route3:{name:'ルート3',rows:["TTTTTTTTTTTTTTTTTTTTTTTTRRTTTT",
 "T.......................RR...T",
 "T..,,,,....####.........RR...T",
 "T..,,,,....####.........RR...T",
 "T.......................RR...T",
-"T..####.....,,,,,.......RR...T",
+"T..####.....,,,,,..!....RR...T",
 "RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
 "RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
 "T..,,,,,....####........,,,..T",
@@ -1408,6 +1523,7 @@ route3:{name:'ルート3',rows:[
 "T............................T",
 "T..,,,,,.......S.............T",
 "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"],
+ground:'.',items:{'19,5':'spotion'},
 warps:[{x:0,y:6,to:'seiryu',tx:18,ty:8},{x:0,y:7,to:'seiryu',tx:18,ty:8},
        {x:24,y:0,to:'cave',tx:8,ty:18},{x:25,y:0,to:'cave',tx:8,ty:18}],
 npcs:[
@@ -1422,8 +1538,7 @@ npcs:[
 signs:{'15,11':'かんばん:「ひがし → イワクラどうくつ / にし ← セイリュウシティ」'},
 enc:{lv:[14,18],list:[['oononezu',20],['sorahane',18],['kabutoga',18],['iwagoro',16],['biritto',12],['honomera',10],['pukari',6]]}},
 
-cave:{name:'イワクラどうくつ',rows:[
-"________~~__________",
+cave:{name:'イワクラどうくつ',rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~~_",
 "_~~____~~~~~~____~~_",
 "_~~____~~~~~~____~~_",
@@ -1431,11 +1546,11 @@ cave:{name:'イワクラどうくつ',rows:[
 "_~~~~~~~~__~~~~~~~~_",
 "_~~____~~__~~____~~_",
 "_~~____~~__~~____~~_",
-"_~~~~~~~~__~~~~~~~~_",
+"_~~~~~~~~__~!~~~~~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "_~~____~~~~~~____~~_",
 "_~~____~~~~~~____~~_",
-"_~~~~~~~~~~~~~~~~~~_",
+"_~~~~~~~~~~~!~~~~~~_",
 "_~~~~____~~____~~~~_",
 "_~~~~____~~____~~~~_",
 "_~~~~~~~~~~~~~~~~~~_",
@@ -1443,6 +1558,7 @@ cave:{name:'イワクラどうくつ',rows:[
 "_~~____~~~~~~____~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
+ground:'~',items:{'12,8':'revive','12,12':'ether'},
 warps:[{x:8,y:19,to:'route3',tx:24,ty:1},{x:9,y:19,to:'route3',tx:24,ty:1},
        {x:8,y:0,to:'hinata',tx:9,ty:17},{x:9,y:0,to:'hinata',tx:9,ty:17}],
 npcs:[
@@ -1478,6 +1594,7 @@ hinata:{name:'ヒナタ港町',rows:[
 "T..F.....RR.....F..T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+fish:{lv:[18,26],list:[['awabee',30],['pukari',25],['shizuku',15],['uzushio',12],['ooawabi',10],['shinkaio',8]]},
 warps:[{x:9,y:18,to:'cave',tx:8,ty:1},{x:10,y:18,to:'cave',tx:8,ty:1},
        {x:9,y:0,to:'route4',tx:9,ty:18},
        {x:8,y:9,to:'hinatagym',tx:9,ty:9}],
@@ -1528,8 +1645,7 @@ npcs:[
 signs:{},
 enc:null},
 
-route4:{name:'ルート4',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
+route4:{name:'ルート4',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T..,,,,..RR..,,,,..T",
 "T..,,,,..RR..,,,,..T",
@@ -1540,7 +1656,7 @@ route4:{name:'ルート4',rows:[
 "T........RR........T",
 "T..,,,,,,RR,,,,,,..T",
 "T..,,,,,,RR,,,,,,..T",
-"T........RR........T",
+"T.....!..RR........T",
 "T..#####.RR.#####..T",
 "T..#####.RR.#####..T",
 "T........RR........T",
@@ -1549,6 +1665,7 @@ route4:{name:'ルート4',rows:[
 "T........RR....S...T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+ground:'.',items:{'6,11':'gball'},
 warps:[{x:9,y:19,to:'hinata',tx:9,ty:1},{x:10,y:19,to:'hinata',tx:9,ty:1},
        {x:9,y:0,to:'tenbou',tx:9,ty:16},{x:10,y:0,to:'tenbou',tx:10,ty:16}],
 npcs:[
@@ -1637,8 +1754,7 @@ npcs:[
 signs:{},
 enc:null},
 
-route5:{name:'ルート5',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
+route5:{name:'ルート5',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T..####..RR..####..T",
 "T..####..RR..####..T",
@@ -1647,10 +1763,10 @@ route5:{name:'ルート5',rows:[
 "T........RR........T",
 "T..####..RRRRRR....T",
 "T..####..RR...RR...T",
-"T........RR...RR...T",
+"T....!...RR...RR...T",
 "T..,,,,,,RR...RR...T",
 "T..,,,,,,RR...RR...T",
-"T........RR........T",
+"T........RR.....!..T",
 "T..####..RR..####..T",
 "T..####..RR..####..T",
 "T..,,,...RR...,,,..T",
@@ -1658,6 +1774,7 @@ route5:{name:'ルート5',rows:[
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+ground:'.',items:{'5,9':'spotion','16,12':'parlyz'},
 warps:[{x:9,y:19,to:'tenbou',tx:9,ty:1},{x:10,y:19,to:'tenbou',tx:9,ty:1},
        {x:9,y:0,to:'ganseki',tx:9,ty:17},{x:10,y:0,to:'ganseki',tx:10,ty:17}],
 npcs:[
@@ -1748,13 +1865,12 @@ signs:{},
 enc:null},
 
 /* --- 東西に走る道。ガンセキ村の東門から入り、東の端で北へ抜ける --- */
-route6:{name:'ルート6',rows:[
-"TTTTTTTTTTTTTTTTTTTTTTTTRRTTTT",
+route6:{name:'ルート6',rows:["TTTTTTTTTTTTTTTTTTTTTTTTRRTTTT",
 "T.......................RR...T",
 "T..####.....,,,,,.......RR...T",
 "T..####.....,,,,,.......RR...T",
 "T.......................RR...T",
-"T..,,,,,....####........RR...T",
+"T..,,,,,....####.....!..RR...T",
 "RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
 "RRRRRRRRRRRRRRRRRRRRRRRRRR...T",
 "T..,,,,,....####........,,,..T",
@@ -1762,6 +1878,7 @@ route6:{name:'ルート6',rows:[
 "T............................T",
 "T..####........S.............T",
 "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"],
+ground:'.',items:{'21,5':'hpotion'},
 warps:[{x:0,y:6,to:'ganseki',tx:18,ty:8},{x:0,y:7,to:'ganseki',tx:18,ty:8},
        {x:24,y:0,to:'kazan',tx:8,ty:18},{x:25,y:0,to:'kazan',tx:8,ty:18}],
 npcs:[
@@ -1776,8 +1893,7 @@ npcs:[
 signs:{'15,11':'かんばん:「ひがし → カザン洞 / にし ← ガンセキ村」'},
 enc:{lv:[30,35],list:[['honomera',22],['gansekio',18],['tenkuga',10],['elekyu',16],['gigakuwaga',10],['oononezu',14],['enblaze',10]]}},
 
-kazan:{name:'カザン洞',rows:[
-"________~~__________",
+kazan:{name:'カザン洞',rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~~_",
 "_~~LLL~~~~~~~~LLL~~_",
 "_~~LLL~~~~~~~~LLL~~_",
@@ -1785,11 +1901,11 @@ kazan:{name:'カザン洞',rows:[
 "_~~~~~~~~__~~~~~~~~_",
 "_~~LL~~~~__~~~~LL~~_",
 "_~~LL~~~~__~~~~LL~~_",
-"_~~~~~~~~__~~~~~~~~_",
+"_~!~~~~~~__~~~~~~~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "_~~LLLL~~~~~~LLLL~~_",
 "_~~LLLL~~~~~~LLLL~~_",
-"_~~~~~~~~~~~~~~~~~~_",
+"_~~~~~~~~~~~!~~~~~~_",
 "_~~~~LLL~~~~LLL~~~~_",
 "_~~~~LLL~~~~LLL~~~~_",
 "_~~~~~~~~~~~~~~~~~~_",
@@ -1797,6 +1913,7 @@ kazan:{name:'カザン洞',rows:[
 "_~~LLL~~~~~~~~LLL~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
+ground:'~',items:{'2,8':'mrevive','12,12':'uball'},
 warps:[{x:8,y:19,to:'route6',tx:24,ty:1},{x:9,y:19,to:'route6',tx:24,ty:1},
        {x:8,y:0,to:'kazanmachi',tx:9,ty:17},{x:9,y:0,to:'kazanmachi',tx:9,ty:17}],
 npcs:[
@@ -1887,8 +2004,7 @@ npcs:[
 signs:{},
 enc:null},
 
-route7:{name:'ルート7',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
+route7:{name:'ルート7',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T.,,,,,..RR..,,,,,.T",
 "T.,,,,,..RR..,,,,,.T",
@@ -1899,7 +2015,7 @@ route7:{name:'ルート7',rows:[
 "T........RR........T",
 "T.,,,,,,,RR,,,,,,,.T",
 "T.,,,,,,,RR,,,,,,,.T",
-"T........RR........T",
+"T........RR...!....T",
 "TWWWW....RR....WWWWT",
 "TWWWW....RR....WWWWT",
 "T........RR........T",
@@ -1908,6 +2024,8 @@ route7:{name:'ルート7',rows:[
 "T........RR....S...T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+fish:{lv:[30,38],list:[['awabee',22],['uzushio',24],['ooawabi',22],['pukari',14],['shinkaio',18]]},
+ground:'.',items:{'14,11':'ether'},
 warps:[{x:9,y:19,to:'kazanmachi',tx:9,ty:1},{x:10,y:19,to:'kazanmachi',tx:9,ty:1},
        {x:9,y:0,to:'midori',tx:9,ty:17},{x:10,y:0,to:'midori',tx:10,ty:17}],
 npcs:[
@@ -1961,8 +2079,7 @@ npcs:[
 signs:{'12,10':'かんばん:「ミドリジム —— リーダー ワカバ / くさタイプ」'},
 enc:null},
 
-route8:{name:'ルート8',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
+route8:{name:'ルート8',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T..,,,,..RR..,,,,..T",
 "T..,,,,..RR..,,,,..T",
@@ -1972,16 +2089,18 @@ route8:{name:'ルート8',rows:[
 "T........RR........T",
 "T..,,,,,,RR,,,,,,..T",
 "T..,,,,,,RR,,,,,,..T",
-"T........RR........T",
+"T..!.....RR........T",
 "TWWWW....RR....WWWWT",
 "TWWWW....RR....WWWWT",
-"T........RR........T",
+"T........RR.!......T",
 "T..,,,,..RR..,,,,..T",
 "T..,,,,..RR..,,,,..T",
 "T........RR....S...T",
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+fish:{lv:[36,44],list:[['ooawabi',26],['uzushio',24],['shinkaio',22],['awabee',16],['aquare',12]]},
+ground:'.',items:{'3,10':'uball','12,13':'awake'},
 warps:[{x:9,y:19,to:'midori',tx:9,ty:1},{x:10,y:19,to:'midori',tx:9,ty:1},
        {x:9,y:0,to:'sorami',tx:9,ty:17},{x:10,y:0,to:'sorami',tx:10,ty:17}],
 npcs:[
@@ -2066,8 +2185,7 @@ npcs:[
 signs:{},
 enc:null},
 
-route9:{name:'ルート9',rows:[
-"TTTTTTTTTRRTTTTTTTTT",
+route9:{name:'ルート9',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T..####..RR..####..T",
 "T..####..RR..####..T",
@@ -2079,7 +2197,7 @@ route9:{name:'ルート9',rows:[
 "T........RR...RR...T",
 "T..####..RR...RR...T",
 "T..####..RR...RR...T",
-"T........RR........T",
+"T........RR.!......T",
 "T..,,,,..RR..,,,,..T",
 "T..,,,,..RR..,,,,..T",
 "T........RR........T",
@@ -2087,6 +2205,7 @@ route9:{name:'ルート9',rows:[
 "T........RR........T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
+ground:'.',items:{'12,12':'hpotion'},
 warps:[{x:9,y:19,to:'sorami',tx:9,ty:1},{x:10,y:19,to:'sorami',tx:9,ty:1},
        {x:9,y:0,to:'owari',tx:9,ty:17},{x:10,y:0,to:'owari',tx:10,ty:17}],
 npcs:[
@@ -2177,8 +2296,7 @@ signs:{},
 enc:null},
 
 /* --- チャンピオンロード。岩押しと迷路の総合コース --- */
-chroad:{name:'チャンピオンロード',puz:1,rows:[
-"________~~__________",
+chroad:{name:'チャンピオンロード',puz:1,rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~~_",
 "_~~____~~~~~~____~~_",
 "_~~____~~~~~~____~~_",
@@ -2186,11 +2304,11 @@ chroad:{name:'チャンピオンロード',puz:1,rows:[
 "_~~~~~~~_~~~~~~~~~~_",
 "_~~LL~~~_~~~~~~LL~~_",
 "_~~LL~~~_~~~~~~LL~~_",
-"_~~~~~~~O~~~~~~~~~~_",
+"_~!~~~~~O~~~~~~~~~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "_~~LLLL~~~~~~LLLL~~_",
 "_~~LLLL~~~~~~LLLL~~_",
-"_~~~~~~~~~~~~~~~~~~_",
+"_~~~~~~~~~!~~~~~~~~_",
 "_~~~~____~O___~~~~~_",
 "_~~~~____~~___~~~~~_",
 "_~~~~~~~~~~~~~~~~~~_",
@@ -2198,6 +2316,7 @@ chroad:{name:'チャンピオンロード',puz:1,rows:[
 "_~~LLL~~~~~~~~LLL~~_",
 "_~~~~~~~~~~~~~~~~~~_",
 "________~~__________"],
+ground:'~',items:{'2,8':'candy','10,12':'mrevive'},
 warps:[{x:8,y:19,to:'owari',tx:9,ty:1},{x:9,y:19,to:'owari',tx:9,ty:1},
        {x:8,y:0,to:'hall',tx:9,ty:12},{x:9,y:0,to:'hall',tx:9,ty:12}],
 npcs:[
@@ -2402,6 +2521,123 @@ enc:null}
 
 for(const k in MAPS) MAPS[k].key=k;      /* 自分のキーを引けるようにしておく */
 
+/* ============================ 町の家 ============================ */
+/* 扉の数だけ小部屋を自動生成して MAPS に登録する。手書きの部屋を
+   増やさずに「どの扉からも入れる」を実現する */
+const HOUSE_ROWS=[
+"wwwwwwwwww",
+"wbbffffbbw",
+"wffffffffw",
+"wffffffffw",
+"wffffffffw",
+"wffffffffw",
+"wbffffffbw",
+"wfffeffffw",
+"wwwwwwwwww"];
+const HOUSE_TALK={
+ town:[['おばあさん',['この 町は ちいさいけれど、','たびの はじまりには ちょうど いいのよ。']],
+       ['おじいさん',['わしも わかいころは トレーナーじゃった。','いまは この いすが あいぼうじゃ。']]],
+ seiryu:[['むしはかせ',['むしタイプは そだつのが はやい。','じょばんに たよりに なるぞ。']],
+         ['おんなのこ',['ジムの いけがきは まいとし かたちが かわるの。','ことしは とくに ふくざつね。']]],
+ hinata:[['りょうし',['うみは ゆたかだ。','つりざおが あれば もっと たのしめるぞ。']],
+         ['おかみさん',['みなとの ひとは みんな みずタイプずき。','あなたも すきに なるわよ。']]],
+ tenbou:[['はつめいか',['たかだいは かみなりが おちやすい。','だから でんきタイプが あつまるんだ。']],
+         ['しょうねん',['ぼく、そらを とんでみたいんだ。','いつか カゼキリと いっしょに!']]],
+ ganseki:[['いしくだき',['やまの いわは かたい。','だが こころは もっと かたく もて!']],
+          ['おかあさん',['むすこが いしを あつめて こまってるの。','へやが いしだらけよ。']]],
+ kazanmachi:[['おんせんばん',['かざんの ねつで おゆが わくの。','たびの つかれが とれるわよ。']],
+             ['おじさん',['ようがんに ちかづくなよ。','あついなんてもんじゃ ないぞ。']]],
+ midori:[['はなや',['ミドリ台は いちねんじゅう みどり。','くさタイプには てんごくよ。']],
+         ['たびびと',['ここが たいりくの はてだと おもってた。','でも そらの うえに まちが あるらしい。']]],
+ sorami:[['くもみはり',['くもの うえは しずかでしょう。','したの まちが おもちゃみたいに みえるの。']],
+         ['としより',['そらの あしばは スイッチで うごく。','あわてず ひとつずつ ふむんじゃ。']]],
+ owari:[['もときょうし',['ここは たびの おわりの まち。','そして リーグの はじまりの まちだ。']],
+        ['おんなのひと',['四天王は とちゅうで かいふくできないの。','どうぐを たくさん もっていってね。']]]
+};
+const HOUSE_GIFT={
+ town:['potion','たびの おまもりよ。もっていって!'],
+ seiryu:['gball','むしとりの おれいだ。つかってくれ!'],
+ hinata:['rod','うみの おとこの あかしだ。もっていけ!'],
+ tenbou:['ether','たかだいの おみやげだ。うけとれ!'],
+ ganseki:['spotion','やまの ひとの こころづかいだ。'],
+ kazanmachi:['hpotion','おんせんの おれいよ。もっていって!'],
+ midori:['mrevive','はなの おまもり。きっと やくに たつわ。'],
+ sorami:['uball','そらの おくりものよ。うけとって!'],
+ owari:['candy','リーグへの はなむけだ。もっていけ!']
+};
+function buildHouses(){
+  for(const k of Object.keys(MAPS)){
+    const m=MAPS[k];
+    if(!HOUSE_TALK[k]) continue;
+    let idx=0;
+    m.rows.forEach((row,y)=>{
+      for(let x=0;x<row.length;x++){
+        if(row[x]!=='D') continue;
+        const key=k+'_h'+idx;
+        const talk=HOUSE_TALK[k][idx%HOUSE_TALK[k].length];
+        const npcs=[{x:4,y:2,pal:idx%2?'girl':'boy',dir:'down',nm:talk[0],say:talk[1]}];
+        /* 町にひとつだけ、道具をくれる人を置く */
+        if(idx===0&&HOUSE_GIFT[k]){
+          const g=HOUSE_GIFT[k];
+          npcs[0]={x:4,y:2,pal:idx%2?'girl':'boy',dir:'down',nm:talk[0],
+                   gift:{item:g[0],flag:'gift_'+k,msg:g[1]},say:talk[1]};
+        }
+        /* 出口は扉の1マス下。塞がっていれば扉の位置へ戻す */
+        const below=(m.rows[y+1]&&!SOLID.includes(m.rows[y+1][x]))?y+1:y;
+        MAPS[key]={name:MAPS[k].name,rows:HOUSE_ROWS.slice(),ground:'f',
+          warps:[{x:4,y:7,to:k,tx:x,ty:below}],npcs,signs:{},enc:null,indoor:1};
+        MAPS[key].key=key;
+        m.warps.push({x,y,to:key,tx:4,ty:6});
+        idx++;
+      }
+    });
+  }
+}
+buildHouses();
+
+/* ============================ つり ============================ */
+/* みずタイルに むかって A。つりざおが あれば みずのモンスターが つれる */
+const FISHDEF={lv:[10,22],list:[['pukari',30],['awabee',30],['shizuku',15],['uzushio',10],['ooawabi',10],['shinkaio',5]]};
+function waitPressMs(ms){
+  return new Promise(r=>{
+    let done=false;
+    waitA=()=>{ if(done) return; done=true; r(true); };
+    setTimeout(()=>{ if(done) return; done=true; if(waitA) waitA=null; r(false); },ms);
+  });
+}
+async function fishOrLook(){
+  if(!G.bag.rod){ runScript(['みずうみだ。とても きれいだ。']); return; }
+  if(!alive().length){ runScript(['たたかえる モンスターが いない!']); return; }
+  ui.busy=true;
+  await say('つりざおを おろした…',{keep:true});
+  await sleep(ri(1100,3000));
+  if(!ui.text){ ui.busy=false; return; }
+  ui.text=null; ui.fish=1; sfx('ok');
+  const hit=await waitPressMs(950);
+  ui.fish=0;
+  if(!hit){ await say('…にげられて しまった。'); ui.busy=false; return; }
+  const mp=M(), tbl=mp.fish||FISHDEF;
+  const tot=tbl.list.reduce((a,b)=>a+b[1],0);
+  let r=Math.random()*tot, id=tbl.list[0][0];
+  for(const q of tbl.list){ r-=q[1]; if(r<=0){ id=q[0]; break; } }
+  await say('おっと! なにか かかった!');
+  ui.busy=false;
+  battle({wild:mk(id,ri(tbl.lv[0],tbl.lv[1]))});
+}
+
+/* ============================ 落ちている道具 ============================ */
+async function pickItem(x,y){
+  const mp=M(), key='i_'+mp.key+'_'+x+'_'+y;
+  const it=(mp.items||{})[x+','+y]||'potion';
+  ui.busy=true;
+  G.flags[key]=1;
+  G.bag[it]=(G.bag[it]||0)+1;
+  sfx('catch');
+  await say(ITEMS[it].n+'を みつけた!');
+  ui.busy=false;
+}
+
+
 /* ============================ タイル描画 ============================ */
 function hsh(x,y,s){ let n=(x*374761393+y*668265263+(s||0)*1274126177)|0; n=(n^(n>>13))*1274126177; return ((n^(n>>16))>>>0)/4294967296; }
 let tick=0;
@@ -2523,6 +2759,21 @@ function drawTile(ch,px_,py,wx,wy){
       g.fillStyle='#ffa828'; g.fillRect(px_+3+o,py+4,6,3); g.fillRect(px_+10-o,py+11,4,2);
       g.fillStyle='#ffe860'; g.fillRect(px_+5+o,py+5,3,1);
       break;}
+    case 'b':                                        /* 家具 */
+      g.fillStyle='#5c5470'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#8a6a44'; g.fillRect(px_+1,py+3,14,10);
+      g.fillStyle='#a8865a'; g.fillRect(px_+2,py+4,12,4);
+      g.fillStyle='#5a4128'; g.fillRect(px_+2,py+13,3,3); g.fillRect(px_+11,py+13,3,3);
+      break;
+    case '!':{                                       /* おちている どうぐ */
+      const gr=M().ground||'.';
+      drawTile(gr,px_,py,wx,wy);
+      const b=Math.sin(tick/14)*1.2;
+      g.fillStyle='#20161f'; g.fillRect(px_+3,py+4+b,10,9);
+      g.fillStyle='#f0f0f0'; g.fillRect(px_+4,py+5+b,8,7);
+      g.fillStyle='#e0402c'; g.fillRect(px_+4,py+5+b,8,3);
+      g.fillStyle='#20161f'; g.fillRect(px_+4,py+8+b,8,1); g.fillRect(px_+7,py+7+b,2,3);
+      break;}
     case '~':                                        /* 洞窟の床 */
       g.fillStyle='#6a5c58'; g.fillRect(px_,py,16,16);
       g.fillStyle='#7a6a64'; for(let i=0;i<4;i++){ const r=hsh(wx,wy,i);
@@ -2563,7 +2814,8 @@ const ITEMS={
   ether:{n:'ピーピーエイド',pr:900,pp:10,ds:'わざの ポイントを 10 かいふく。'},
   revive:{n:'げんきのかけら',pr:1500,rev:1,ds:'ひんしから はんぶん かいふく。'},
   mrevive:{n:'げんきのかたまり',pr:4000,rev:2,ds:'ひんしから ぜんかいふく。'},
-  candy:{n:'ふしぎなアメ',pr:6000,lvl:1,ds:'レベルが 1つ あがる。'}
+  candy:{n:'ふしぎなアメ',pr:6000,lvl:1,ds:'レベルが 1つ あがる。'},
+  rod:{n:'つりざお',pr:0,key:1,ds:'みずべで つりが できる。'}
 };
 const SHOPLIST=['ball','gball','potion','spotion','antidote','parlyz','awake','full','revive'];
 /* バッジが増えると品ぞろえが良くなる */
@@ -2608,6 +2860,7 @@ function gateOpen(mp){
 function tileAt(mp,x,y){
   const r=mp.rows; if(y<0||y>=r.length||x<0||x>=r[0].length) return 'T';
   const c=r[y][x];
+  if(c==='!') return (G&&G.flags['i_'+mp.key+'_'+x+'_'+y])?(mp.ground||'.'):'!';
   if(c==='G') return gateOpen(mp)?'f':'G';
   if(puz&&puz.map===mp.key){
     const o=puz.ov[x+','+y]; if(o!==undefined) return o;
@@ -2693,9 +2946,9 @@ function interact(){
   if(n){ n.dir={up:'down',down:'up',left:'right',right:'left'}[G.dir]; talk(n); return; }
   const s=(mp.signs||{})[f.x+','+f.y];
   if(s){ runScript([s]); return; }
+  if(tileAt(mp,f.x,f.y)==='!'){ pickItem(f.x,f.y); return; }
   const t=tileAt(mp,f.x,f.y);
-  if(t==='D') runScript(['カギが かかっている…']);
-  else if(t==='W') runScript(['みずうみだ。とても きれいだ。']);
+  if(t==='W'){ fishOrLook(); return; }
   else if(t==='T') runScript(['おおきな きが しげっている。']);
 }
 async function runScript(lines){
@@ -2718,6 +2971,15 @@ async function talk(n){
     ui.busy=false; return;
   }
   if(n.shop){ await shop(n); ui.busy=false; return; }
+  if(n.gift&&!G.flags[n.gift.flag]){
+    for(const l of (n.say||[])) await say(l,{name:n.nm});
+    await say(n.gift.msg,{name:n.nm});
+    G.flags[n.gift.flag]=1;
+    G.bag[n.gift.item]=(G.bag[n.gift.item]||0)+1;
+    sfx('catch');
+    await say(ITEMS[n.gift.item].n+'を もらった!');
+    ui.busy=false; return;
+  }
   if(n.gate){
     for(const l of (npcOpen(n)? (n.say2||['どうぞ とおって。']) : n.say)) await say(l,{name:n.nm});
     ui.busy=false; return;
@@ -2783,6 +3045,11 @@ function drawField(){
   ents.push({y:py,draw:()=>drawSpr(heroSpr('hero',G.dir),Math.round(px_-cam.x),Math.round(py-cam.y)-2+bobo,1,G.dir==='left')});
   ents.sort((a,b)=>a.y-b.y);
   for(const e of ents) e.draw();
+  if(ui.fish){
+    const bx=Math.round(px_-cam.x), by=Math.round(py-cam.y);
+    p.fillStyle='#ffffff'; p.fillRect(bx+4,by-16,8,11);
+    p.fillStyle='#20161f'; p.fillRect(bx+7,by-14,2,5); p.fillRect(bx+7,by-8,2,2);
+  }
   if(tileAt(mp,G.x,G.y)===','){ p.fillStyle='#3f8a3a'; p.fillRect(Math.round(px_-cam.x),Math.round(py-cam.y)+9,16,5);
     p.fillStyle='#5cc255'; for(let i=0;i<4;i++) p.fillRect(Math.round(px_-cam.x)+2+i*4,Math.round(py-cam.y)+9,1,4); }
 }
@@ -3738,6 +4005,7 @@ async function bagField(){
     ui.shopDesc=null;
     if(c<0) return;
     const k=ks[c], it=ITEMS[k];
+    if(it.key){ await say('みずべで Aボタンを おすと つれるよ。'); continue; }
     if(it.ball){ await say('いま つかっても しかたが ない。'); continue; }
     const i=await pickParty({});
     if(i<0) continue;
