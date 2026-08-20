@@ -299,7 +299,27 @@ const SONGS={
   boss:{bpm:170,g:0.14,tr:[
     {w:'sawtooth',g:0.09,p:seq('76 - 75 - 76 - 75 - 76 - 71 - 74 - 72 - 69 - 72 - 76 - 79 - 81 - 79 - 76 - - -')},
     {w:'square',g:0.13,p:seq('40 40 40 40 40 40 40 40 39 39 39 39 39 39 39 39 38 38 38 38 38 38 38 38 40 40 40 40 40 40 40 40')}],
-    dr:'khshkhshkhshkhshkhshkhshkhshkhsh'.split('')}
+    dr:'khshkhshkhshkhshkhshkhshkhshkhsh'.split('')},
+  /* ジムリーダー: 明るく前へ押す。勝てそうで勝てない緊張感 */
+  gym:{bpm:160,g:0.13,tr:[
+    {w:'square',g:0.12,p:seq('74 - 74 76 77 - 77 - 79 - 81 - 79 - 77 - 76 - 76 77 79 - 79 - 81 - 83 - 81 - - -')},
+    {w:'triangle',g:0.15,p:seq('50 50 50 50 50 50 50 50 53 53 53 53 53 53 53 53 55 55 55 55 55 55 55 55 57 57 57 57 57 57 57 57')}],
+    dr:'khshkhshkhshkhshkhshkhshkhshkhsh'.split('')},
+  /* 四天王: 儀式めいた短調。半音でじりじり詰める */
+  elite:{bpm:144,g:0.14,tr:[
+    {w:'sawtooth',g:0.08,p:seq('69 - 68 - 69 - 71 - 72 - 71 - 69 - - - 68 - 67 - 68 - 69 - 71 - 69 - 68 - - -')},
+    {w:'square',g:0.13,p:seq('33 - 33 33 33 - 33 - 32 - 32 32 32 - 32 - 31 - 31 31 31 - 31 - 33 - 33 33 33 - 33 -')}],
+    dr:'k-s-k-s-k-s-khs-k-s-k-s-k-s-khs-'.split('')},
+  /* チャンピオン: 最速。ひろい アルペジオで一気に駆け上がる */
+  champion:{bpm:178,g:0.14,tr:[
+    {w:'square',g:0.12,p:seq('76 79 83 - 86 - 83 - 81 - 78 - 81 - 83 - 74 78 81 - 85 - 81 - 79 - 76 - 79 - - -')},
+    {w:'triangle',g:0.15,p:seq('40 40 47 47 40 40 47 47 38 38 45 45 38 38 45 45 36 36 43 43 36 36 43 43 40 40 47 47 40 40 47 47')}],
+    dr:'khshkhshkhshkhshkhshkhshkhshkhsh'.split('')},
+  /* 伝説: 全音階のひろい跳躍。ゆっくりだが重い */
+  legend:{bpm:132,g:0.15,tr:[
+    {w:'triangle',g:0.14,p:seq('72 - - 78 - - 74 - 80 - - 76 - - - - 70 - - 76 - - 82 - 78 - - 74 - - - -')},
+    {w:'sine',g:0.18,p:seq('36 - 36 - 36 - 36 - 34 - 34 - 34 - 34 - 38 - 38 - 38 - 38 - 36 - 36 - 36 - 36 -')}],
+    dr:'k---k---s---k---k---k---s---kh--'.split('')}
 };
 const MAPBGM={town:'town',route1:'route',forest:'forest',route2:'route',seiryu:'city',
   route3:'route',cave:'cave',hinata:'city',route4:'route',tenbou:'city',
@@ -309,7 +329,9 @@ const MAPBGM={town:'town',route1:'route',forest:'forest',route2:'route',seiryu:'
   chroad:'cave',hall:'city',
   seiryugym:'city',hinatagym:'city',tenbougym:'city',gansekigym:'city',
   kazangym:'city',midorigym:'city',soramigym:'city',owarigym:'city',
-  e1:'boss',e2:'boss',e3:'boss',e4:'boss',champ:'boss'};
+  e1:'elite',e2:'elite',e3:'elite',e4:'elite',champ:'champion',
+  lair_daichi:'legend',lair_ryuga:'legend',lair_kaiou:'legend',
+  lair_tenku:'legend',lair_sekai:'legend'};
 let bgm={name:null,step:0,at:0,timer:null};
 function bgmStop(){ if(bgm.timer){ clearInterval(bgm.timer); bgm.timer=null; } bgm.name=null; }
 function bgmPlay(name){
@@ -340,7 +362,7 @@ function bgmTick(){
 }
 function wantBgm(){
   if(scene==='title') return 'title';
-  if(scene==='battle') return (bt&&(bt.tr||bt.leg))?'boss':'battle';
+  if(scene==='battle') return (bt&&bt.kind)||'battle';
   if(scene==='field'&&G) return MAPBGM[G.map]||'town';
   return null;
 }
@@ -2471,7 +2493,7 @@ e1:{name:'四天王 イサム',rows:[
 warps:[{x:9,y:1,to:'e2',tx:9,ty:9},{x:10,y:1,to:'e2',tx:9,ty:9}],
 npcs:[
  {x:9,y:5,pal:'boy',dir:'down',nm:'四天王 イサム',guard:1,
-  trainer:{party:[['gansekio',52],['iwagoro',50],['gigakuwaga',53],['gansekio',55]],money:16000,
+  trainer:{bgm:'elite',party:[['gansekio',52],['iwagoro',50],['gigakuwaga',53],['gansekio',55]],money:16000,
    pre:['よく きた。四天王の ひとり、イサムだ。','おれの いわは くだけん。ためしてみろ!'],
    win:['…みごとだ。つぎの まへ すすめ。'],
    after:['つぎは みずの ミナモだ。ゆだんするな。']}}
@@ -2494,7 +2516,7 @@ e2:{name:'四天王 ミナモ',rows:[
 warps:[{x:9,y:1,to:'e3',tx:9,ty:9},{x:10,y:1,to:'e3',tx:9,ty:9}],
 npcs:[
  {x:9,y:5,pal:'nurse',dir:'down',nm:'四天王 ミナモ',guard:1,
-  trainer:{party:[['uzushio',53],['aquare',52],['pukari',51],['shinkaio',56]],money:18000,
+  trainer:{bgm:'elite',party:[['uzushio',53],['aquare',52],['pukari',51],['shinkaio',56]],money:18000,
    pre:['ようこそ。みずの ミナモよ。','ふかい うみの そこまで しずめてあげる。'],
    win:['…いい ながれだったわ。すすみなさい。'],
    after:['つぎは ほのおの カグラ。あつさに きをつけて。']}}
@@ -2517,7 +2539,7 @@ e3:{name:'四天王 カグラ',rows:[
 warps:[{x:9,y:1,to:'e4',tx:9,ty:9},{x:10,y:1,to:'e4',tx:9,ty:9}],
 npcs:[
  {x:9,y:5,pal:'shop',dir:'down',nm:'四天王 カグラ',guard:1,
-  trainer:{party:[['enblaze',54],['burnix',53],['honomera',52],['enblaze',57]],money:20000,
+  trainer:{bgm:'elite',party:[['enblaze',54],['burnix',53],['honomera',52],['enblaze',57]],money:20000,
    pre:['3ばんめの カグラよ。','ここまで きた ねつりょう、うけとめてあげる!'],
    win:['…あついのは あなたの ほうだったわね。'],
    after:['さいごは でんきの ライゾウ。きを つけて。']}}
@@ -2540,7 +2562,7 @@ e4:{name:'四天王 ライゾウ',rows:[
 warps:[{x:9,y:1,to:'champ',tx:9,ty:9},{x:10,y:1,to:'champ',tx:9,ty:9}],
 npcs:[
  {x:9,y:5,pal:'rival',dir:'down',nm:'四天王 ライゾウ',guard:1,
-  trainer:{party:[['elekyu',55],['biritto',53],['kazekiri',56],['kaminaryu',58]],money:22000,
+  trainer:{bgm:'elite',party:[['elekyu',55],['biritto',53],['kazekiri',56],['kaminaryu',58]],money:22000,
    pre:['四天王 さいごの ひとり、ライゾウだ。','ここを こえれば チャンピオンの まだ。','—— いくぞ! かくごしろ!'],
    win:['…おれの かみなりも とどかなかったか。'],
    after:['さあ いけ。チャンピオンが まっている。']}}
@@ -2766,6 +2788,7 @@ function buildHouses(){
         MAPS[key]={name:MAPS[k].name,rows:HOUSE_ROWS.slice(),ground:'f',
           warps:[{x:4,y:7,to:k,tx:x,ty:below}],npcs,signs:{},enc:null,indoor:1};
         MAPS[key].key=key;
+        MAPBGM[key]=MAPBGM[k]||'town';
         m.warps.push({x,y,to:key,tx:4,ty:6});
         idx++;
       }
@@ -3441,10 +3464,14 @@ async function battle(o){
   const prev=scene; scene='battle'; ui.busy=true;
   const isTr=!!o.trainer;
   const friendly=isTr&&o.trainer.friendly;
+  /* 戦闘の種類ごとに曲を変える。トレーナー側で bgm を指定もできる */
+  const kind=o.legend?'legend'
+    :isTr?(o.trainer.bgm||(o.trainer.champ?'champion':o.trainer.badge?'gym':'boss'))
+    :'battle';
   /* 友達戦は本編に一切影響させない。開始前の状態を控えて終了時に戻す */
   const snap=friendly?G.party.map(m=>({hp:m.hp,st:m.st,slp:m.slp,pp:m.mv.map(s=>s.pp)})):null;
-  bgmPlay((isTr||o.legend)?'boss':'battle');
-  bt={tr:o.trainer||null, leg:!!o.legend, ei:0, wild:!isTr,
+  bgmPlay(kind);
+  bt={tr:o.trainer||null, leg:!!o.legend, kind, ei:0, wild:!isTr,
       foe:isTr?o.trainer.party[0]:o.wild, me:alive()[0],
       anim:{md:0,fd:0,mh:0,fh:0}, ball:null, intro:0};
   resetB(bt.me); resetB(bt.foe);
