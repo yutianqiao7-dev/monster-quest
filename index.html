@@ -382,6 +382,7 @@ let waitA=null, scene='boot';
 function press(k){
   sfx(k==='a'?'ok':'tick');
   if(ui.text && !ui.text.done){ ui.text.n=ui.text.full.length; return; }
+  if(ui.qty){ qtyKey(k); return; }
   if(ui.menu){ menuKey(k); return; }
   if(waitA && (k==='a'||k==='b')){ const r=waitA; waitA=null; r(); return; }
   if(ui.busy) return;
@@ -401,6 +402,20 @@ function menuKey(k){
   if(m.onMove) m.onMove(m.idx);
 }
 function waitPress(){ return new Promise(r=>{ waitA=r; }); }
+/* 数量えらび。▲▼で1つずつ、◀▶で10ずつ動かす */
+function qtyKey(k){
+  const q=ui.qty, was=q.n;
+  if(k==='up') q.n=Math.min(q.max,q.n+1);
+  else if(k==='down') q.n=Math.max(1,q.n-1);
+  else if(k==='right') q.n=Math.min(q.max,q.n+10);
+  else if(k==='left') q.n=Math.max(1,q.n-10);
+  else if(k==='a'){ const r=q.res; ui.qty=null; r(q.n); return; }
+  else if(k==='b'||k==='start'){ const r=q.res; ui.qty=null; sfx('no'); r(0); return; }
+  if(q.n===was&&(k==='up'||k==='right')) sfx('no');
+}
+function pickQty(name,price,max){
+  return new Promise(r=>{ ui.qty={n:1,max:Math.max(1,max),price,name,res:r}; });
+}
 function choose(items,o){
   o=o||{};
   return new Promise(r=>{ ui.menu=Object.assign({items:items.map(x=>typeof x==='string'?{t:x}:x), idx:o.idx||0, res:r}, o); });
@@ -3722,12 +3737,18 @@ async function shop(n){
     if(c<0||c===stock.length) break;
     const k=stock[c], it=ITEMS[k];
     if(G.money<it.pr){ sfx('no'); await say('おかねが たりません!',{name:n.nm}); continue; }
-    await say(it.n+'ですね。1つ '+it.pr+'えんです。',{name:n.nm,keep:true});
-    const y=await choose(['かう','やめる'],{x:104,y:66,w:50,cols:1,cancel:true});
+    await say(it.n+'ですね。いくつ ほしいですか?',{name:n.nm});
+    const max=Math.min(99,Math.floor(G.money/it.pr));
+    const q=await pickQty(it.n,it.pr,max);
+    if(q<=0) continue;
+    const cost=it.pr*q;
+    await say(it.n+'を '+q+'こですね。'+cost+'えんに なります。',{name:n.nm,keep:true});
+    const y=await choose(['かう','やめる'],{x:104,y:60,w:50,cols:1,cancel:true});
     ui.text=null;
     if(y!==0) continue;
-    G.money-=it.pr; G.bag[k]=(G.bag[k]||0)+1; sfx('ok');
-    await say(it.n+'を てにいれた!');
+    if(G.money<cost){ sfx('no'); await say('おかねが たりません!',{name:n.nm}); continue; }
+    G.money-=cost; G.bag[k]=(G.bag[k]||0)+q; sfx('ok');
+    await say(it.n+'を '+q+'こ てにいれた!');
   }
   await say('まいど ありがとうございます!',{name:n.nm});
 }
@@ -4431,6 +4452,22 @@ function drawTextBox(){
   for(let i=0;i<show.length;i++) T(show[i],9,y+i*12,{size:9});
   if(t.done&&Math.sin(tick/7)>0) T('▼',147,129,{size:8,color:'#f4b942'});
 }
+function drawQty(){
+  const q=ui.qty; if(!q) return;
+  box(14,42,132,58);
+  T(q.name,20,47,{size:8.5,max:96});
+  T('もてる '+q.max+'こまで',140,48,{size:6.5,align:'right',color:'#bdb8d6'});
+  /* ▲ 数 ▼ を中央に大きく */
+  const cx=80, blink=Math.sin(tick/7)>0;
+  T(q.n<q.max&&blink?'▲':' ',cx,54,{size:7,align:'center',color:'#f4b942'});
+  T('× '+q.n,cx,62,{size:14,weight:700,align:'center',color:'#f4b942'});
+  T(q.n>1&&blink?'▼':' ',cx,79,{size:7,align:'center',color:'#f4b942'});
+  fill(22,88,116,1,'#3f3b5c');
+  T('けい',20,91,{size:8,color:'#bdb8d6'});
+  T((q.price*q.n)+'えん',140,90,{size:9,align:'right'});
+  box(3,112,154,18);
+  T('▲▼ 1こ   ◀▶ 10こ   A けってい   B やめる',80,117,{size:6.5,align:'center',color:'#bdb8d6'});
+}
 function drawMenu(){
   const m=ui.menu; if(!m) return;
   const cols=m.cols||1, rowH=m.rowH||(m.compact?13:12), fsz=m.size||(m.compact?9:8.5);
@@ -4572,6 +4609,7 @@ function draw(){
   }
   drawTextBox();
   drawMenu();
+  drawQty();
   drawDetail();
   if(ui.fade>0){ d.fillStyle='rgba(0,0,0,'+ui.fade+')'; d.fillRect(0,0,disp.width,disp.height); }
 }
