@@ -331,7 +331,7 @@ const MAPBGM={town:'town',route1:'route',forest:'forest',route2:'route',seiryu:'
   kazangym:'city',midorigym:'city',soramigym:'city',owarigym:'city',
   e1:'elite',e2:'elite',e3:'elite',e4:'elite',champ:'champion',
   lair_daichi:'legend',lair_ryuga:'legend',lair_kaiou:'legend',
-  lair_tenku:'legend',lair_sekai:'legend'};
+  lair_tenku:'legend',lair_sekai:'legend',gamecorner:'city'};
 let bgm={name:null,step:0,at:0,timer:null};
 function bgmStop(){ if(bgm.timer){ clearInterval(bgm.timer); bgm.timer=null; } bgm.name=null; }
 function bgmPlay(name){
@@ -1407,7 +1407,7 @@ function drawSpr(cv,x,y,sc,flip,ctx){
 }
 /* ============================ マップ ============================ */
 /* w 屋内壁 / A B C スイッチ扉 / G トレーナー扉 / O 押せる岩 */
-const SOLID='TWHS#_LwABCGOb!';   /* X(祭壇の入口) と D(扉) はワープなので通す */
+const SOLID='TWHS#_LwABCGOb!M';  /* X(祭壇の入口) と D(扉) はワープなので通す */
 /* ジムバッジ。順にクリアしていくと次のエリアの門が開く */
 const BADGES=[
   {id:'midori',n:'みどりバッジ',town:'セイリュウシティ',leader:'ソウマ',t:'むし'},
@@ -1823,16 +1823,17 @@ tenbou:{name:'テンボウ台',rows:[
 "T...HHHHHHHHH......T",
 "T...HHHHYHHHH......T",
 "T........RR.S......T",
-"T..HHHHH...........T",
-"T..HHHHH...........T",
-"T..HHDHH...........T",
+"T..HHHHH...HHHHHH..T",
+"T..HHHHH...HHHHHH..T",
+"T..HHDHH...HHYHHH..T",
 "T........RR........T",
 "T..F.....RR.....F..T",
 "T........RR........T",
 "TTTTTTTTTRRTTTTTTTTT"],
 warps:[{x:9,y:17,to:'route4',tx:9,ty:1},{x:10,y:17,to:'route4',tx:10,ty:1},
        {x:9,y:0,to:'route5',tx:9,ty:18},
-       {x:8,y:9,to:'tenbougym',tx:9,ty:9}],
+       {x:8,y:9,to:'tenbougym',tx:9,ty:9},
+       {x:13,y:13,to:'gamecorner',tx:9,ty:7}],
 npcs:[
  {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'ikazuchi'},
   say:['この さきは やまへ つづく けわしい みち。','テンボウジムの バッジが ないと とおせないよ。'],
@@ -1840,7 +1841,9 @@ npcs:[
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
  {x:16,y:10,pal:'girl',dir:'left',nm:'まちのひと',
-  say:['ジムの なかは でんりゅうの とびらが 3まい。','スイッチを じゅんばんに ふむのよ。']}
+  say:['ジムの なかは でんりゅうの とびらが 3まい。','スイッチを じゅんばんに ふむのよ。']},
+ {x:16,y:14,pal:'boy',dir:'left',nm:'あそびにん',
+  say:['ひがしの たてものは ゲームコーナー!','スロットで コインを ためると','けいひんと こうかんできるんだ。','カミナリュウも いるらしいぞ!']}
 ],
 signs:{'12,10':'かんばん:「テンボウジム —— リーダー ライガ / でんきタイプ」'},
 enc:null},
@@ -2694,6 +2697,26 @@ npcs:[
   legend:{id:'sekaio',lv:70,flag:'leg_lair_sekai',pre:['くうかんが ゆがんでいる。','この せかいの はじまりから いる なにかが ——']}}
 ],
 signs:{},enc:null,indoor:1},
+gamecorner:{name:'ゲームコーナー',ground:'f',rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wfMfMfMfMfMfMfMfMffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wfMfMfMfMfMfMfMfMffw",
+"wffffffffffffffffffw",
+"wffffffffefffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:9,y:7,to:'tenbou',tx:13,ty:14}],
+npcs:[
+ {x:17,y:1,pal:'shop',dir:'down',nm:'コインうりば',coin:1},
+ {x:17,y:4,pal:'girl',dir:'down',nm:'けいひん こうかんじょ',prize:1},
+ {x:2,y:6,pal:'boy',dir:'right',nm:'あそびにん',
+  say:['スロットは 1かい 3コイン。','Aボタンで リールを ひとつずつ とめるんだ。','まんなかの よこ1れつが そろえば あたり!']},
+ {x:14,y:6,pal:'girl',dir:'left',nm:'おきゃくさん',
+  say:['セブンが 3つ そろうと 300コイン!','いちどでいいから みてみたいわ。']}
+],
+signs:{},enc:null,indoor:1},
 /* --- ジム6 くさ: 生垣の迷路。トレーナー全員を倒すと最奥の扉が開く --- */
 midorigym:{name:'ミドリジム',puz:1,rows:[
 "wwwwwwwwwwwwwwwwwwww",
@@ -2986,6 +3009,18 @@ function drawTile(ch,px_,py,wx,wy){
       g.fillStyle='rgba(180,140,255,'+(0.25+gl*0.5).toFixed(2)+')';
       g.fillRect(px_+5,py+8,6,6);
       break;}
+    case 'M':                                        /* スロット台 */
+      g.fillStyle='#5c5470'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#3a2a48'; g.fillRect(px_+1,py+1,14,14);
+      g.fillStyle='#e0402c'; g.fillRect(px_+2,py+2,12,3);
+      g.fillStyle='#100e18'; g.fillRect(px_+2,py+6,12,5);
+      for(let i=0;i<3;i++){
+        const c=['#f4b942','#7fd36a','#6fb8f0'][(i+Math.floor(tick/12))%3];
+        g.fillStyle=c; g.fillRect(px_+3+i*4,py+7,3,3);
+      }
+      g.fillStyle='#8a8298'; g.fillRect(px_+3,py+12,10,2);
+      g.fillStyle='#f0c030'; g.fillRect(px_+13,py+7,2,4);
+      break;
     case 'b':                                        /* 家具 */
       g.fillStyle='#5c5470'; g.fillRect(px_,py,16,16);
       g.fillStyle='#8a6a44'; g.fillRect(px_+1,py+3,14,10);
@@ -3051,7 +3086,7 @@ const shopStock=()=>badgeCount()>=4?SHOPLIST.concat(SHOPLIST2):SHOPLIST;
 let G=null;
 function newGame(){
   G={map:'town',x:9,y:15,dir:'up',party:[],box:[],
-     bag:{ball:5,potion:3},money:1500,dex:{},flags:{},badges:{},steps:0,play:0};
+     bag:{ball:5,potion:3},money:1500,coins:0,dex:{},flags:{},badges:{},steps:0,play:0};
 }
 const SAVEKEY='monsterquest_v1';
 function save(){ try{ localStorage.setItem(SAVEKEY,JSON.stringify(G)); return true; }catch(e){ return false; } }
@@ -3061,6 +3096,7 @@ function load(){
     G=JSON.parse(s);
     /* 旧セーブとの互換: 後から足したフィールドを補う */
     if(!G.badges) G.badges={};
+    if(typeof G.coins!=='number') G.coins=0;
     if(!G.box) G.box=[];
     if(!MAPS[G.map]){ G.map='town'; G.x=9; G.y=15; }
     initPuz(G.map);
@@ -3175,6 +3211,7 @@ function interact(){
   const s=(mp.signs||{})[f.x+','+f.y];
   if(s){ runScript([s]); return; }
   if(tileAt(mp,f.x,f.y)==='!'){ pickItem(f.x,f.y); return; }
+  if(tileAt(mp,f.x,f.y)==='M'){ slotMachine(); return; }
   const t=tileAt(mp,f.x,f.y);
   if(t==='W'){ fishOrLook(); return; }
   else if(t==='T') runScript(['おおきな きが しげっている。']);
@@ -3199,6 +3236,8 @@ async function talk(n){
     ui.busy=false; return;
   }
   if(n.shop){ await shop(n); ui.busy=false; return; }
+  if(n.coin){ await coinShop(n); ui.busy=false; return; }
+  if(n.prize){ await prizeShop(n); ui.busy=false; return; }
   if(n.legend){
     if(!alive().length){ await say('たたかえる モンスターが いない!'); ui.busy=false; return; }
     for(const l of n.legend.pre) await say(l);
@@ -4184,6 +4223,161 @@ async function commsMenu(){
   }
 }
 
+
+/* ============================ ゲームコーナー ============================ */
+/* コインは おかねとは べつの通貨。スロットで増やして景品と交換する */
+const SYMPAL=[
+  {a:'#e0304c',b:'#ff7080',c:'#3fa03c'},   /* さくらんぼ */
+  {a:'#2f8a3e',b:'#e0304c',c:'#7fd36a'},   /* すいか */
+  {a:'#f0c030',b:'#fff0a0',c:'#8a6a10'},   /* ベル */
+  {a:'#e0402c',b:'#f0f0f0',c:'#20161f'},   /* ボール */
+  {a:'#f4b942',b:'#fff8c0',c:'#a07800'},   /* スター */
+  {a:'#e0304c',b:'#ffffff',c:'#8a1020'}    /* セブン */
+];
+const SYMART=[
+["...c...","..c.c..",".c...c.","aa...aa","baa.aab",".ba.ab.","......."],
+[".......",".aaaaa.","abbbbba","abbbbba",".abbba.","..aaa..","......."],
+["...a...","..bbb..",".bbbbb.",".aaaaa.","aaaaaaa","...c...","......."],
+["..ccc..",".abbba.","caaaaac","ccccccc","cbbbbbc",".bbbbb.","..ccc.."],
+["...a...","...b...","aabbbaa",".abbba.","..aaa..",".aa.aa.","a.....a"],
+["aaaaaaa","abbbbba","....aa.","...aa..","..aa...","..aa...","..aa..."]
+];
+const SYMPAY=[15,30,50,100,400,600];
+const SYMNAME=['さくらんぼ','すいか','ベル','ボール','スター','セブン'];
+/* リール帯。セブンは各リールに1つだけ */
+const REEL=[
+ [0,1,2,0,3,1,4,0,2,1,5,3],
+ [1,0,3,2,0,4,1,0,2,3,5,1],
+ [2,0,1,3,0,2,4,1,0,3,5,2]];
+const SLOTBET=3;
+
+function drawSym(i,x,y){
+  const art=SYMART[i], pal=SYMPAL[i];
+  for(let r=0;r<7;r++) for(let c=0;c<7;c++){
+    const ch=art[r][c]; if(ch==='.') continue;
+    fill(x+c*2,y+r*2,2,2,pal[ch]);
+  }
+}
+function drawSlot(){
+  const s=ui.slot; if(!s) return;
+  box(18,24,124,82);
+  T('コイン '+G.coins,80,27,{size:8,align:'center',color:'#f4b942'});
+  for(let i=0;i<3;i++){
+    const rx=26+i*38;
+    fill(rx,40,32,50,'#100e18');
+    for(let j=-1;j<=1;j++){
+      const L=REEL[i].length, idx=((s.pos[i]+j)%L+L)%L;
+      drawSym(REEL[i][idx],rx+9,58+j*16-7);
+    }
+    if(s.stop[i]) fill(rx,40,32,1,'#f4b942');
+  }
+  /* まんなかが そろえば あたり */
+  fill(24,50,112,1,'#f4b942'); fill(24,66,112,1,'#f4b942');
+  T('◀',21,55,{size:8,color:'#f4b942'}); T('▶',137,55,{size:8,color:'#f4b942'});
+  T(s.msg||'',80,94,{size:7.5,align:'center',color:s.win?'#f4b942':'#e8e4ff'});
+}
+async function spinOnce(){
+  G.coins-=SLOTBET;
+  ui.slot={pos:[ri(0,11),ri(0,11),ri(0,11)],stop:[0,0,0],msg:'Aで リールを とめよう!',win:0};
+  const t=setInterval(()=>{ const s=ui.slot; if(!s) return;
+    for(let i=0;i<3;i++) if(!s.stop[i]) s.pos[i]=(s.pos[i]+1)%REEL[i].length; },85);
+  for(let i=0;i<3;i++){
+    await waitPress();
+    if(!ui.slot){ clearInterval(t); return; }
+    ui.slot.stop[i]=1; sfx('tick');
+    ui.slot.msg=(i<2)?'あと '+(2-i)+'つ!':'…';
+    await sleep(180);
+  }
+  clearInterval(t);
+  const r=[0,1,2].map(i=>REEL[i][ui.slot.pos[i]]);
+  let pay=0, label='';
+  if(r[0]===r[1]&&r[1]===r[2]){ pay=SYMPAY[r[0]]; label=SYMNAME[r[0]]+' そろい!'; }
+  else if(r[0]===0&&r[1]===0){ pay=8; label='さくらんぼ 2つ!'; }
+  else if(r[0]===0){ pay=2; label='さくらんぼ 1つ'; }
+  if(pay){
+    G.coins+=pay; ui.slot.win=pay;
+    ui.slot.msg=label+'  '+pay+'コイン!';
+    sfx(pay>=100?'catch':'lvl'); ui.flashScreen=pay>=100?20:8;
+  } else { ui.slot.msg='…はずれ'; sfx('no'); }
+  await sleep(900);
+}
+async function slotMachine(){
+  ui.busy=true;
+  if(G.coins<SLOTBET){
+    await say('コインが たりない! 1かい '+SLOTBET+'コイン ひつようだ。');
+    ui.busy=false; return;
+  }
+  await say('スロットだ! 1かい '+SLOTBET+'コイン。',{keep:true});
+  ui.text=null;
+  while(true){
+    await spinOnce();
+    const keep=G.coins>=SLOTBET;
+    ui.slot.msg=keep?'もう いちど?':'コインが なくなった…';
+    const c=keep?await choose(['もう いちど','やめる'],
+      {x:100,y:108,w:56,cols:1,rowH:11,pad:6,size:8}):-1;
+    if(c!==0) break;
+  }
+  ui.slot=null;
+  await say('コインは '+G.coins+'まい。');
+  ui.busy=false;
+}
+/* ---- コイン売り場 ---- */
+const COIN_PACK=50, COIN_PRICE=500;
+async function coinShop(n){
+  while(true){
+    await say('コイン '+COIN_PACK+'まいを '+COIN_PRICE+'えんで うってるよ。',{name:n.nm});
+    const max=Math.min(50,Math.floor(G.money/COIN_PRICE));
+    if(max<1){ await say('おかねが たりないみたいだね…',{name:n.nm}); return; }
+    const q=await pickQty('コイン '+COIN_PACK+'まいセット',COIN_PRICE,max);
+    if(q<=0) return;
+    const cost=COIN_PRICE*q;
+    if(G.money<cost){ sfx('no'); await say('おかねが たりません!',{name:n.nm}); continue; }
+    G.money-=cost; G.coins+=COIN_PACK*q; sfx('ok');
+    await say('コインを '+(COIN_PACK*q)+'まい てにいれた!');
+    await say('いまの もちコインは '+G.coins+'まい。');
+    return;
+  }
+}
+/* ---- けいひん交換所 ---- */
+const PRIZES=[
+  {c:200, item:'uball'},
+  {c:500, item:'hpotion'},
+  {c:800, item:'mrevive'},
+  {c:1200,item:'candy'},
+  {c:1200,mon:'hikarigoke',lv:25},
+  {c:3000,mon:'kaminaryu',lv:35}
+];
+async function prizeShop(n){
+  await say('コインと けいひんを こうかんするよ。',{name:n.nm});
+  while(true){
+    const items=PRIZES.map(p=>({
+      t:p.item?ITEMS[p.item].n:SP[p.mon].n+' (Lv'+p.lv+')',
+      r:p.c+'まい', col:G.coins>=p.c?'#fff':'#8a8296',
+      mon:p.mon||null}));
+    items.push({t:'やめる',r:''});
+    const c=await choose(items,{x:6,y:14,w:148,cols:1,cancel:true,max:6,
+      title:'けいひん  もちコイン '+G.coins+'まい'});
+    if(c<0||c===PRIZES.length) break;
+    const p=PRIZES[c];
+    if(G.coins<p.c){ sfx('no'); await say('コインが たりないよ。',{name:n.nm}); continue; }
+    const nm=p.item?ITEMS[p.item].n:SP[p.mon].n;
+    await say(nm+'だね。'+p.c+'まいで いいかい?',{name:n.nm,keep:true});
+    const y=await choose(['こうかんする','やめる'],{x:96,y:60,w:60,cols:1,cancel:true});
+    ui.text=null;
+    if(y!==0) continue;
+    G.coins-=p.c; sfx('catch');
+    if(p.item){
+      G.bag[p.item]=(G.bag[p.item]||0)+1;
+      await say(nm+'を てにいれた!');
+    } else {
+      const m=mk(p.mon,p.lv); m.name=SP[p.mon].n; resetB(m); caught(p.mon);
+      if(G.party.length<6){ G.party.push(m); await say(nm+'が なかまに くわわった!'); }
+      else { G.box.push(m); await say('てもちが いっぱい! '+nm+'は ボックスへ おくられた。'); }
+    }
+  }
+  await say('また あそびに きてね!',{name:n.nm});
+}
+
 /* ---- スタートメニュー ---- */
 async function openMenu(){
   ui.busy=true;
@@ -4256,7 +4450,8 @@ async function bagField(){
   while(true){
     const {ks,items}=bagItems();
     if(!ks.length){ await say('どうぐを もっていない。'); return; }
-    const c=await choose(items,{x:6,y:16,w:148,cols:1,title:'どうぐ  '+G.money+'えん',cancel:true,max:6,
+    const c=await choose(items,{x:6,y:16,w:148,cols:1,cancel:true,max:6,
+      title:'どうぐ  '+G.money+'えん'+(G.coins?'  コイン'+G.coins:''),
       onMove:i=>{ ui.shopDesc=ks[i]?ITEMS[ks[i]].ds:''; }});
     ui.shopDesc=null;
     if(c<0) return;
@@ -4608,6 +4803,7 @@ function draw(){
     for(let i=0;i<Math.min(ls.length,3);i++) T(ls[i],8,y0+i*11,{size:8.5});
   }
   drawTextBox();
+  drawSlot();
   drawMenu();
   drawQty();
   drawDetail();
