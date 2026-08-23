@@ -1407,7 +1407,7 @@ function drawSpr(cv,x,y,sc,flip,ctx){
 }
 /* ============================ マップ ============================ */
 /* w 屋内壁 / A B C スイッチ扉 / G トレーナー扉 / O 押せる岩 */
-const SOLID='TWHS#_LwABCGOb!M';  /* X(祭壇の入口) と D(扉) はワープなので通す */
+const SOLID='TWHS#_LwABCGOb!MK'; /* X(祭壇の入口) と D(扉) はワープなので通す */
 /* ジムバッジ。順にクリアしていくと次のエリアの門が開く */
 const BADGES=[
   {id:'midori',n:'みどりバッジ',town:'セイリュウシティ',leader:'ソウマ',t:'むし'},
@@ -1538,7 +1538,7 @@ route2:{name:'ルート2',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T..TTTT..RR........T",
 "T..TTTT..RR....S...T",
-"T........RR....!...T",
+"T.......KRRK...!...T",
 "T........RRRRRR....T",
 "T........RR...RR...T",
 "T..,,,,..RR...RR...T",
@@ -1590,6 +1590,9 @@ warps:[{x:9,y:18,to:'route2',tx:9,ty:1},{x:10,y:18,to:'route2',tx:10,ty:1},
        {x:19,y:8,to:'route3',tx:1,ty:6},
        {x:7,y:9,to:'seiryugym',tx:9,ty:9}],
 npcs:[
+ {x:3,y:11,pal:'boy',dir:'down',nm:'ひでんの けんきゅうか',hm:'cut',
+  say:['もりを ぬけてきたんだね。','この マシンが あれば','ちいさな きを きりはらえるよ。'],
+  say2:['いあいぎりで みちが ひらけるはずさ。']},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
  {x:18,y:8,pal:'boy',dir:'left',nm:'けいびいん',open:[0,2],gate:{badge:'midori'},
@@ -1730,6 +1733,9 @@ warps:[{x:17,y:11,to:'lair_kaiou',tx:6,ty:6},{x:9,y:18,to:'cave',tx:8,ty:1},{x:1
        {x:9,y:0,to:'route4',tx:9,ty:18},
        {x:8,y:9,to:'hinatagym',tx:9,ty:9}],
 npcs:[
+ {x:4,y:11,pal:'shop',dir:'down',nm:'ひでんの けんきゅうか',hm:'surf',
+  say:['うみの おとこは なみに のるものさ。','みずタイプが いれば','どこまでも いける!'],
+  say2:['なみのりで うみを わたってきな!']},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
  {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'shiokaze'},
@@ -1892,7 +1898,7 @@ route5:{name:'ルート5',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T........RR........T",
 "T..####..RR..####..T",
 "T..####..RR..####..T",
-"T..,,,,..RR..,,,,..T",
+"T..,,,,.KRRK.,,,,..T",
 "T..,,,,..RR..,,,,..T",
 "T........RR........T",
 "T..####..RRRRRR....T",
@@ -1947,6 +1953,9 @@ warps:[{x:9,y:18,to:'route5',tx:9,ty:1},{x:10,y:18,to:'route5',tx:10,ty:1},
        {x:19,y:8,to:'route6',tx:1,ty:6},
        {x:7,y:9,to:'gansekigym',tx:5,ty:9}],
 npcs:[
+ {x:3,y:15,pal:'boy',dir:'down',nm:'ひでんの けんきゅうか',hm:'strength',
+  say:['やまの おとこは ちからもち。','おおきな いわも おしのけられる。'],
+  say2:['かいりきで いわを どかしてくれ。']},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
  {x:18,y:8,pal:'boy',dir:'left',nm:'けいびいん',open:[0,2],gate:{badge:'iwayama'},
@@ -2272,6 +2281,9 @@ warps:[{x:3,y:11,to:'lair_tenku',tx:6,ty:6},{x:9,y:18,to:'route8',tx:9,ty:1},{x:
        {x:9,y:0,to:'route9',tx:9,ty:18},
        {x:8,y:9,to:'soramigym',tx:9,ty:9}],
 npcs:[
+ {x:15,y:11,pal:'girl',dir:'down',nm:'ひでんの けんきゅうか',hm:'fly',
+  say:['くもの うえの まちへ ようこそ。','そらを とべる こなら','いちど いった まちへ もどれるわ。'],
+  say2:['そらをとぶで どこへでも どうぞ。']},
  {x:5,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
  {x:13,y:5,pal:'shop',dir:'down',nm:'てんいん',shop:1},
  {x:9,y:1,pal:'boy',dir:'down',nm:'けいびいん',open:[2,0],gate:{badge:'sorakaze'},
@@ -2331,7 +2343,7 @@ route9:{name:'ルート9',rows:["TTTTTTTTTRRTTTTTTTTT",
 "T..####..RR...RR...T",
 "T..####..RR...RR...T",
 "T........RR.!......T",
-"T..,,,,..RR..,,,,..T",
+"T..,,,,.KRRK.,,,,..T",
 "T..,,,,..RR..,,,,..T",
 "T........RR........T",
 "T..,,,...RR....S...T",
@@ -2429,7 +2441,7 @@ signs:{},
 enc:null},
 
 /* --- チャンピオンロード。岩押しと迷路の総合コース --- */
-chroad:{name:'チャンピオンロード',puz:1,rows:["________~~__________",
+chroad:{name:'チャンピオンロード',puz:1,hmPush:1,rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~~_",
 "_~~____~~~~~~____~~_",
 "_~~____~~~~~~____~~_",
@@ -2441,7 +2453,7 @@ chroad:{name:'チャンピオンロード',puz:1,rows:["________~~__________",
 "_~~~~~~~~~~~~~~~~~X_",
 "_~~LLLL~~~~~~LLLL~~_",
 "_~~LLLL~~~~~~LLLL~~_",
-"_~~~~~~~~~!~~~~~~~~_",
+"_~~O~~~~~~!~~~~~O~~_",
 "_~~~~____~O___~~~~~_",
 "_~~~~____~~___~~~~~_",
 "_~~~~~~~~~~~~~~~~~~_",
@@ -3009,6 +3021,14 @@ function drawTile(ch,px_,py,wx,wy){
       g.fillStyle='rgba(180,140,255,'+(0.25+gl*0.5).toFixed(2)+')';
       g.fillRect(px_+5,py+8,6,6);
       break;}
+    case 'K':                                        /* ちいさな き（いあいぎりで きれる） */
+      g.fillStyle='#5fa64a'; g.fillRect(px_,py,16,16);
+      g.fillStyle='#4a2f1c'; g.fillRect(px_+7,py+11,3,4);
+      g.fillStyle='#2f8a3e'; g.fillRect(px_+3,py+4,10,8);
+      g.fillStyle='#49b055'; g.fillRect(px_+4,py+5,6,4);
+      g.fillStyle='#1f5c2c'; g.fillRect(px_+3,py+10,10,2);
+      g.fillStyle='#8fd07a'; g.fillRect(px_+5,py+2,3,2); g.fillRect(px_+9,py+3,2,2);
+      break;
     case 'M':                                        /* スロット台 */
       g.fillStyle='#5c5470'; g.fillRect(px_,py,16,16);
       g.fillStyle='#3a2a48'; g.fillRect(px_+1,py+1,14,14);
@@ -3086,7 +3106,8 @@ const shopStock=()=>badgeCount()>=4?SHOPLIST.concat(SHOPLIST2):SHOPLIST;
 let G=null;
 function newGame(){
   G={map:'town',x:9,y:15,dir:'up',party:[],box:[],
-     bag:{ball:5,potion:3},money:1500,coins:0,dex:{},flags:{},badges:{},steps:0,play:0};
+     bag:{ball:5,potion:3},money:1500,coins:0,dex:{},flags:{},badges:{},
+     hm:{},visited:{town:1},surf:0,steps:0,play:0};
 }
 const SAVEKEY='monsterquest_v1';
 function save(){ try{ localStorage.setItem(SAVEKEY,JSON.stringify(G)); return true; }catch(e){ return false; } }
@@ -3097,6 +3118,9 @@ function load(){
     /* 旧セーブとの互換: 後から足したフィールドを補う */
     if(!G.badges) G.badges={};
     if(typeof G.coins!=='number') G.coins=0;
+    if(!G.hm) G.hm={};
+    if(!G.visited) G.visited={town:1};
+    if(tileAt(MAPS[G.map],G.x,G.y)!=='W') G.surf=0;
     if(!G.box) G.box=[];
     if(!MAPS[G.map]){ G.map='town'; G.x=9; G.y=15; }
     initPuz(G.map);
@@ -3124,6 +3148,7 @@ function tileAt(mp,x,y){
   const r=mp.rows; if(y<0||y>=r.length||x<0||x>=r[0].length) return 'T';
   const c=r[y][x];
   if(c==='!') return (G&&G.flags['i_'+mp.key+'_'+x+'_'+y])?(mp.ground||'.'):'!';
+  if(c==='K') return (G&&G.flags['cut_'+mp.key+'_'+x+'_'+y])?(mp.ground||'.'):'K';
   if(c==='G') return gateOpen(mp)?'f':'G';
   if(puz&&puz.map===mp.key){
     const o=puz.ov[x+','+y]; if(o!==undefined) return o;
@@ -3142,16 +3167,21 @@ function npcAt(mp,x,y){
   return (mp.npcs||[]).find(n=>{ if(npcGone(n)) return false;
     const q=npcXY(n); return q[0]===x&&q[1]===y; });
 }
-function blocked(mp,x,y){ return SOLID.includes(tileAt(mp,x,y)) || !!npcAt(mp,x,y); }
+function blocked(mp,x,y){
+  const t=tileAt(mp,x,y);
+  if(t==='W') return !(G&&G.surf)||!!npcAt(mp,x,y);   /* なみのり中だけ みずへ */
+  return SOLID.includes(t)||!!npcAt(mp,x,y);
+}
 const DIRV={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 
 function tryMove(dir){
   G.dir=dir;
   const [dx,dy]=DIRV[dir], nx=G.x+dx, ny=G.y+dy;
-  if(puz && tileAt(M(),nx,ny)==='O' && !npcAt(M(),nx,ny)){
+  if(puz && tileAt(M(),nx,ny)==='O' && !npcAt(M(),nx,ny)
+     && (!M().hmPush || hasHM('strength'))){
     /* 岩押し。押した先が床なら岩ごと1マス進む */
     const bx=nx+dx, by=ny+dy, t=tileAt(M(),bx,by);
-    if((t==='f'||t==='.')&&!npcAt(M(),bx,by)){
+    if('f.~'.includes(t)&&!npcAt(M(),bx,by)){   /* 屋内・野外・洞窟の床どれでも押せる */
       puz.ov[nx+','+ny]='f'; puz.ov[bx+','+by]='O';
       sfx('no'); ui.flashScreen=4;
       mv={dx,dy,t:0,dur:15};
@@ -3176,8 +3206,17 @@ function updField(){
 }
 function onStep(){
   const mp=M();
+  if(G.surf && tileAt(mp,G.x,G.y)!=='W') G.surf=0;   /* りくに あがったら おりる */
   const w=(mp.warps||[]).find(w=>w.x===G.x&&w.y===G.y);
   if(w){ doWarp(w); return; }
+  if(G.surf && mp.fish && alive().length && Math.random()<0.07){
+    const t=mp.fish;
+    const tot=t.list.reduce((a,b)=>a+b[1],0);
+    let r=Math.random()*tot, id=t.list[0][0];
+    for(const q of t.list){ r-=q[1]; if(r<=0){ id=q[0]; break; } }
+    battle({wild:mk(id,ri(t.lv[0],t.lv[1]))});
+    return;
+  }
   const st=mp.rows[G.y][G.x];
   if(puz&&(st==='1'||st==='2'||st==='3')){
     puz.sw[+st]=!puz.sw[+st];
@@ -3191,7 +3230,8 @@ function onStep(){
 async function doWarp(w){
   ui.busy=true; sfx('warp');
   for(let i=0;i<=10;i++){ ui.fade=i/10; await sleep(20); }
-  G.map=w.to; G.x=w.tx; G.y=w.ty; mv=null;
+  G.map=w.to; G.x=w.tx; G.y=w.ty; mv=null; G.surf=0;
+  G.visited=G.visited||{}; if(FLYPT.some(f=>f.k===w.to)) G.visited[w.to]=1;
   initPuz(w.to); bgmSync();
   ui.busy=false; ui.banner={t:MAPS[w.to].name,n:110};
   for(let i=10;i>=0;i--){ ui.fade=i/10; await sleep(20); }
@@ -3213,7 +3253,8 @@ function interact(){
   if(tileAt(mp,f.x,f.y)==='!'){ pickItem(f.x,f.y); return; }
   if(tileAt(mp,f.x,f.y)==='M'){ slotMachine(); return; }
   const t=tileAt(mp,f.x,f.y);
-  if(t==='W'){ fishOrLook(); return; }
+  if(t==='W'){ waterAction(); return; }
+  if(t==='K'){ useCut(f.x,f.y); return; }
   else if(t==='T') runScript(['おおきな きが しげっている。']);
 }
 async function runScript(lines){
@@ -3236,6 +3277,7 @@ async function talk(n){
     ui.busy=false; return;
   }
   if(n.shop){ await shop(n); ui.busy=false; return; }
+  if(n.hm){ await giveHM(n); ui.busy=false; return; }
   if(n.coin){ await coinShop(n); ui.busy=false; return; }
   if(n.prize){ await prizeShop(n); ui.busy=false; return; }
   if(n.legend){
@@ -3320,7 +3362,18 @@ function drawField(){
     }});
   }
   const walking=!!mv, bobo=walking?(Math.floor(mv.t/4)%2?1:0):0;
-  ents.push({y:py,draw:()=>drawSpr(heroSpr('hero',G.dir),Math.round(px_-cam.x),Math.round(py-cam.y)-2+bobo,1,G.dir==='left')});
+  ents.push({y:py,draw:()=>{
+    const sx=Math.round(px_-cam.x), sy=Math.round(py-cam.y);
+    if(G.surf){                                   /* なみのり中は いかだに のる */
+      const w=Math.round(Math.sin(tick/9));
+      p.fillStyle='#ffffff'; p.fillRect(sx-1,sy+12+w,18,2);   /* しぶき */
+      p.fillStyle='#a5763f'; p.fillRect(sx+1,sy+7+w,14,5);    /* いかだ */
+      p.fillStyle='#c99a5e'; p.fillRect(sx+2,sy+7+w,12,2);
+      p.fillStyle='#6b4326'; p.fillRect(sx+1,sy+11+w,14,2);
+      p.fillStyle='#e8f4ff'; p.fillRect(sx-2,sy+14+w,6,1); p.fillRect(sx+12,sy+14+w,6,1);
+      drawSpr(heroSpr('hero',G.dir),sx,sy-6+w,1,G.dir==='left');
+    } else drawSpr(heroSpr('hero',G.dir),sx,sy-2+bobo,1,G.dir==='left');
+  }});
   ents.sort((a,b)=>a.y-b.y);
   for(const e of ents) e.draw();
   if(ui.fish){
@@ -3632,7 +3685,7 @@ async function battle(o){
     await say('めのまえが まっくらに なった…');
     G.money=Math.floor(G.money/2);
     for(const m of G.party){ m.hp=m.max; m.st=null; m.slp=0; }
-    G.map='town'; G.x=5; G.y=5; G.dir='up'; mv=null;
+    G.map='town'; G.x=5; G.y=5; G.dir='up'; mv=null; G.surf=0;
     await say('ハジマリの町の ナースに たすけられた。');
     await say('モンスターたちは かいふく した!');
     ui.busy=false;
@@ -4224,6 +4277,122 @@ async function commsMenu(){
 }
 
 
+
+/* ============================ ひでんマシン ============================ */
+/* 手に入れると フィールドで つかえる わざが ふえる。
+   つかうには そのタイプの モンスターを てもちに いれておく */
+const HM=[
+ {id:'cut',  no:'01',ab:'いあいぎり',ty:['くさ','むし'],
+  ds:'ちいさな きを きりたおせる。'},
+ {id:'surf', no:'02',ab:'なみのり',  ty:['みず'],
+  ds:'みずのうえを すすめる。'},
+ {id:'strength',no:'03',ab:'かいりき',ty:['いわ','ノーマル'],
+  ds:'おおきな いわを おせる。'},
+ {id:'fly',  no:'04',ab:'そらをとぶ',ty:['ひこう'],
+  ds:'いちど いった町へ とんでいける。'}
+];
+const hmOf=id=>HM.find(h=>h.id===id);
+const hasHM=id=>!!(G.hm&&G.hm[id]);
+/* そのわざを つかえる モンスターが てもちに いるか */
+function hmUser(id){
+  const h=hmOf(id); if(!h||!hasHM(id)) return null;
+  return G.party.find(m=>h.ty.includes(SP[m.id].t))||null;
+}
+async function hmDeny(id){
+  const h=hmOf(id);
+  await say(h.ty.join('か ')+'タイプの モンスターが いないと'+h.ab+'は つかえない。');
+}
+
+/* ---------------- そらをとぶ ---------------- */
+/* いちど おとずれた町だけが いきさきに ならぶ */
+const FLYPT=[
+ {k:'town',      n:'ハジマリの町',      x:9,y:15},
+ {k:'seiryu',    n:'セイリュウシティ',  x:9,y:11},
+ {k:'hinata',    n:'ヒナタ港町',        x:9,y:11},
+ {k:'tenbou',    n:'テンボウ台',        x:9,y:11},
+ {k:'ganseki',   n:'ガンセキ村',        x:9,y:11},
+ {k:'kazanmachi',n:'カザン町',          x:9,y:11},
+ {k:'midori',    n:'ミドリ台',          x:9,y:11},
+ {k:'sorami',    n:'ソラミ台',          x:9,y:11},
+ {k:'owari',     n:'オワリ町',          x:9,y:11}
+];
+const canFlyHere=()=>!!(G&&!M().indoor&&!M().nofly);
+async function useFly(){
+  if(!hmUser('fly')){ await hmDeny('fly'); return; }
+  if(!canFlyHere()){ await say('ここでは そらへ とびたてない!'); return; }
+  const list=FLYPT.filter(p=>G.visited&&G.visited[p.k]);
+  if(!list.length){ await say('まだ とんでいける町が ない。'); return; }
+  const c=await choose(list.map(p=>({t:p.n,r:p.k===G.map?'いまここ':''})),
+    {x:8,y:16,w:144,cols:1,cancel:true,max:6,title:'そらをとぶ  どこへ いく?'});
+  if(c<0) return;
+  const p=list[c];
+  if(p.k===G.map){ await say('もう ここに いる!'); return; }
+  const who=hmUser('fly');
+  await say(who.name+'は そらへ とびあがった!');
+  sfx('warp');
+  ui.busy=true;
+  for(let i=0;i<=12;i++){ ui.fade=i/12; await sleep(22); }
+  G.map=p.k; G.x=p.x; G.y=p.y; G.dir='down'; G.surf=0; mv=null;
+  initPuz(p.k); bgmSync();
+  ui.banner={t:MAPS[p.k].name,n:110};
+  for(let i=12;i>=0;i--){ ui.fade=i/12; await sleep(22); }
+  ui.fade=0; ui.busy=false;
+}
+
+/* ---------------- なみのり ---------------- */
+async function startSurf(){
+  const who=hmUser('surf');
+  if(!who){ await hmDeny('surf'); return; }
+  await say(who.name+'の せなかに とびのった!');
+  G.surf=1;
+  const [dx,dy]=DIRV[G.dir];
+  mv={dx,dy,t:0,dur:13};
+}
+/* みずべを しらべたとき。なみのりと つりを えらばせる */
+async function waterAction(){
+  if(G.surf){ fishOrLook(); return; }
+  const canSurf=!!hmUser('surf'), canFish=!!G.bag.rod;
+  if(!canSurf){ fishOrLook(); return; }
+  if(!canFish){ ui.busy=true; await startSurf(); ui.busy=false; return; }
+  ui.busy=true;
+  await say('みずうみだ。どうする?',{keep:true});
+  const c=await choose(['なみのり','つりをする','やめる'],
+    {x:96,y:60,w:60,cols:1,cancel:true});
+  ui.text=null;
+  if(c===0){ await startSurf(); ui.busy=false; return; }
+  ui.busy=false;
+  if(c===1) fishOrLook();
+}
+
+/* ---------------- いあいぎり ---------------- */
+async function useCut(x,y){
+  const who=hmUser('cut');
+  if(!who){ ui.busy=true; await hmDeny('cut'); ui.busy=false; return; }
+  ui.busy=true;
+  await say('ちいさな きが みちを ふさいでいる。');
+  await say(who.name+'の いあいぎり!');
+  sfx('crit'); ui.flashScreen=8;
+  G.flags['cut_'+M().key+'_'+x+'_'+y]=1;
+  await sleep(200);
+  await say('きを きりたおした!');
+  ui.busy=false;
+}
+
+/* ---------------- ひでんマシンを わたすNPC ---------------- */
+async function giveHM(n){
+  const h=hmOf(n.hm);
+  if(G.hm&&G.hm[h.id]){
+    for(const l of (n.say2||['ひでんの わざ、やくだてておくれ。'])) await say(l,{name:n.nm});
+    return;
+  }
+  for(const l of (n.say||[])) await say(l,{name:n.nm});
+  G.hm=G.hm||{}; G.hm[h.id]=1;
+  sfx('catch');
+  await say('ひでんマシン'+h.no+'「'+h.ab+'」を もらった!');
+  await say(h.ds);
+  await say(h.ty.join('か ')+'タイプの モンスターが いれば つかえる。');
+}
+
 /* ============================ ゲームコーナー ============================ */
 /* コインは おかねとは べつの通貨。スロットで増やして景品と交換する */
 const SYMPAL=[
@@ -4378,22 +4547,48 @@ async function prizeShop(n){
   await say('また あそびに きてね!',{name:n.nm});
 }
 
+async function hmMenu(){
+  const own=HM.filter(h=>hasHM(h.id));
+  if(!own.length){ await say('まだ ひでんマシンを もっていない。'); return; }
+  while(true){
+    const items=own.map(h=>{
+      const u=hmUser(h.id);
+      return {t:h.ab,r:u?u.name:'つかえない',col:u?'#fff':'#8a8296',mon:u?u.id:null};
+    });
+    const c=await choose(items,{x:6,y:20,w:148,cols:1,cancel:true,max:4,
+      title:'ひでんわざ',
+      onMove:i=>{ ui.shopDesc=own[i]?own[i].ds:''; }});
+    ui.shopDesc=null;
+    if(c<0) return;
+    const h=own[c];
+    if(!hmUser(h.id)){ sfx('no'); await hmDeny(h.id); continue; }
+    if(h.id==='fly'){ await useFly(); return; }
+    await say(h.ab+'は フィールドで つかうよ。');
+    if(h.id==='surf') await say('みずべに むかって Aボタン。');
+    if(h.id==='cut') await say('ちいさな きに むかって Aボタン。');
+    if(h.id==='strength') await say('おおきな いわを おして うごかせる。');
+  }
+}
+
 /* ---- スタートメニュー ---- */
 async function openMenu(){
   ui.busy=true;
   let run=true;
   while(run){
     const box=G.box.length?'ボックス('+G.box.length+')':'ボックス';
-    const c=await choose(['モンスター',box,'どうぐ','バッジ','ずかん','つうしん','セーブ','とじる'],
-      {x:94,y:6,w:62,cols:1,cancel:true});
-    if(c<0||c===7) break;
+    const hmList=HM.filter(h=>hasHM(h.id));
+    const c=await choose(['モンスター',box,'どうぐ','バッジ','ずかん',
+      'ひでんわざ'+(hmList.length?'('+hmList.length+')':''),'つうしん','セーブ','とじる'],
+      {x:92,y:4,w:64,cols:1,cancel:true});
+    if(c<0||c===8) break;
     if(c===0) await partyScreen();
     else if(c===1) await boxScreen();
     else if(c===2) await bagField();
     else if(c===3) await badgeScreen();
     else if(c===4) await dexScreen();
-    else if(c===5){ await commsMenu(); if(scene!=='field') break; }
-    else if(c===6){
+    else if(c===5) await hmMenu();
+    else if(c===6){ await commsMenu(); if(scene!=='field') break; }
+    else if(c===7){
       await say('ぼうけんの きろくを セーブしますか?',{keep:true});
       const y=await choose(['はい','いいえ'],{x:104,y:66,w:50,cols:1,cancel:true});
       ui.text=null;
