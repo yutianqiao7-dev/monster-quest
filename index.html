@@ -2712,8 +2712,8 @@ champ:{name:'チャンピオンの ま',rows:[
 "wffffffffffffffffffw",
 "wffffffffffffffffffw",
 "wffffffffffffffffffw",
-"wwwwwwwwwwwwwwwwwwww"],
-warps:[],
+"wwwwwwwwwDwwwwwwwwww"],
+warps:[{x:9,y:10,to:'hall',tx:9,ty:11}],
 npcs:[
  {x:9,y:4,pal:'rival',dir:'down',nm:'チャンピオン ケイ',
   trainer:{champ:1,money:30000,
@@ -3867,6 +3867,11 @@ async function battle(o){
     await say('つかまえた モンスターは '+DEXORDER.filter(i=>G.dex[i]===2).length+'／'+DEXORDER.length+'しゅるい。');
     await say('きみと モンスターたちの なまえは','えいえんに でんどう入りだ!');
     await say('—— おめでとう! ぼうけんは まだ つづく!');
+    for(const m of G.party){ m.hp=m.max; m.st=null; m.slp=0; }
+    G.map='town'; G.x=5; G.y=5; G.dir='up'; mv=null; G.surf=0;
+    initPuz('town'); bgmSync(); ui.banner={t:MAPS.town.name,n:110};
+    await say('きみは ハジマリの町へ かえってきた。');
+    await say('モンスターたちは すっかり げんきだ!');
     ui.busy=false; save();
   }
 }
