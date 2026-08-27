@@ -3842,12 +3842,37 @@ function newGame(){
      bag:{ball:5,potion:3},money:1500,coins:0,medal:0,dex:{},flags:{},badges:{},
      hm:{},visited:{town:1},surf:0,steps:0,play:0};
 }
+/* ---- セーブデータは 3つ。むかしの 1つだけの きろくは データ1へ ひっこす ---- */
 const SAVEKEY='monsterquest_v1';
-function save(){ try{ localStorage.setItem(SAVEKEY,JSON.stringify(G)); return true; }catch(e){ return false; } }
-function load(){
+const SLOTS=3;
+const slotKey=i=>SAVEKEY+'_'+i;
+let slot=1;                                        /* いま つかっている データ */
+function migrateSave(){
   try{
-    const s=localStorage.getItem(SAVEKEY); if(!s) return false;
-    G=JSON.parse(s);
+    const old=localStorage.getItem(SAVEKEY);
+    if(old && !localStorage.getItem(slotKey(1))) localStorage.setItem(slotKey(1),old);
+    if(old) localStorage.removeItem(SAVEKEY);
+  }catch(e){}
+}
+function save(){ try{ localStorage.setItem(slotKey(slot),JSON.stringify(G)); return true; }catch(e){ return false; } }
+function readSlot(i){ try{ const s=localStorage.getItem(slotKey(i)); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function eraseSlot(i){ try{ localStorage.removeItem(slotKey(i)); return true; }catch(e){ return false; } }
+const playTime=sec=>Math.floor((sec||0)/3600)+':'+String(Math.floor(((sec||0)%3600)/60)).padStart(2,'0');
+/* データ選択に ならべる 見だし */
+function slotInfo(i){
+  const g=readSlot(i); if(!g) return null;
+  const lead=(g.party&&g.party[0])||null;
+  return {lead:lead?lead.name:'？？？', lv:lead?lead.lv:1, id:lead?lead.id:null,
+          badges:g.badges?Object.keys(g.badges).length:0,
+          dex:g.dex?Object.keys(g.dex).filter(k=>g.dex[k]===2).length:0,
+          play:g.play||0, ending:!!(g.flags&&g.flags.ending),
+          where:(MAPS[g.map]&&MAPS[g.map].name)||'？？？'};
+}
+function load(i){
+  try{
+    const k=(i===undefined)?slot:i;
+    const s=localStorage.getItem(slotKey(k)); if(!s) return false;
+    G=JSON.parse(s); slot=k;
     /* 旧セーブとの互換: 後から足したフィールドを補う */
     if(!G.badges) G.badges={};
     if(typeof G.coins!=='number') G.coins=0;
@@ -3861,7 +3886,7 @@ function load(){
     return true;
   }catch(e){ return false; }
 }
-function hasSave(){ try{ return !!localStorage.getItem(SAVEKEY); }catch(e){ return false; } }
+function hasSave(){ for(let i=1;i<=SLOTS;i++) if(readSlot(i)) return true; return false; }
 function seen(id){ if(!G.dex[id]) G.dex[id]=1; }
 function caught(id){ G.dex[id]=2; }
 const M=()=>MAPS[G.map];
@@ -5361,10 +5386,10 @@ async function openMenu(){
     else if(c===5) await hmMenu();
     else if(c===6){ await commsMenu(); if(scene!=='field') break; }
     else if(c===7){
-      await say('ぼうけんの きろくを セーブしますか?',{keep:true});
+      await say('データ'+slot+'に ぼうけんの きろくを セーブしますか?',{keep:true});
       const y=await choose(['はい','いいえ'],{x:104,y:66,w:50,cols:1,cancel:true});
       ui.text=null;
-      if(y===0){ if(save()){ sfx('heal'); await say('ぼうけんの きろくを セーブしました!'); }
+      if(y===0){ if(save()){ sfx('heal'); await say('データ'+slot+'に セーブしました!'); }
         else await say('セーブに しっぱいしました…'); }
     }
   }
@@ -6056,22 +6081,59 @@ async function opening(){
   await say('きたの ルート1で しゅぎょうを つむと いい!',{name:'ハカセ'});
   ui.busy=false;
 }
+/* データ1つぶんの 見だしを つくる */
+function slotRow(i){
+  const f=slotInfo(i);
+  if(!f) return {t:'データ'+i, r:'あき', col:'#8a8296'};
+  return {t:'データ'+i+' '+(f.ending?'★':'')+f.lead+' Lv'+f.lv,
+          r:'バッジ'+f.badges+'  '+playTime(f.play)};
+}
+async function pickSlot(o){
+  o=o||{};
+  const items=[];
+  for(let i=1;i<=SLOTS;i++){
+    const r=slotRow(i);
+    if(o.onlyUsed && r.r==='あき') r.col='#8a8296';
+    items.push(r);
+  }
+  items.push({t:o.back||'やめる',r:''});
+  const c=await choose(items,{x:5,y:52,w:150,cols:1,rowH:13,max:4,
+    title:o.title||'データを えらぶ',cancel:true});
+  return (c<0||c===SLOTS)?-1:c+1;
+}
 async function titleGo(){
   if(ui.menu||ui.busy) return;
   ui.busy=true;
-  const opts=hasSave()?['つづきから','はじめから']:['はじめから'];
-  const c=await choose(opts,{x:44,y:82,w:72,cols:1});
-  if(hasSave()&&c===0){
-    if(load()){ scene='field'; ui.busy=false; ui.banner={t:M().name,n:110}; return; }
+  while(true){
+    const items=[];
+    for(let i=1;i<=SLOTS;i++) items.push(slotRow(i));
+    items.push({t:'データを けす',r:'',col:hasSave()?'#e8a0a0':'#8a8296'});
+    const c=await choose(items,{x:5,y:52,w:150,cols:1,rowH:13,max:4,
+      title:'データを えらぶ'});
+    if(c<0) continue;
+    if(c===SLOTS){                                  /* きえたデータは もどらない */
+      if(!hasSave()){ sfx('no'); continue; }
+      const i=await pickSlot({title:'けす データを えらぶ'});
+      if(i<0) continue;
+      if(!slotInfo(i)){ sfx('no'); await say('データ'+i+'は あきです。'); continue; }
+      await say('データ'+i+'を けします。もとには もどせません!',{keep:true});
+      const y=await choose(['けす','やめる'],{x:100,y:30,w:52,cols:1,cancel:true});
+      ui.text=null;
+      if(y!==0) continue;
+      eraseSlot(i); sfx('no');
+      await say('データ'+i+'を けしました。');
+      continue;
+    }
+    const i=c+1;
+    if(slotInfo(i)){                                /* つづきから */
+      if(load(i)){ scene='field'; ui.busy=false; ui.banner={t:M().name,n:110}; return; }
+      sfx('no'); await say('データ'+i+'を よみこめませんでした…'); continue;
+    }
+    /* あきデータなら はじめから */
+    slot=i; newGame(); scene='field'; ui.busy=false;
+    await opening();
+    return;
   }
-  if(hasSave()&&c===1){
-    await say('いまの きろくは きえてしまいます。よろしいですか?',{keep:true});
-    const y=await choose(['はい','いいえ'],{x:104,y:36,w:48,cols:1,cancel:true});
-    ui.text=null;
-    if(y!==0){ ui.busy=false; return; }
-  }
-  newGame(); scene='field'; ui.busy=false;
-  await opening();
 }
 function loop(){
   tick++;
@@ -6084,6 +6146,7 @@ function loop(){
   }catch(e){ if(!loop.warned){ loop.warned=1; console.error(e); } }
   requestAnimationFrame(loop);
 }
+migrateSave();
 fit(); scene='title'; loop();
 setInterval(()=>{ if(G&&scene==='field'&&!ui.busy) G.play++; },1000);
 
