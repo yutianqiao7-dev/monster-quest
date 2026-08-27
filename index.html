@@ -332,7 +332,8 @@ const MAPBGM={town:'town',route1:'route',forest:'forest',route2:'route',seiryu:'
   e1:'elite',e2:'elite',e3:'elite',e4:'elite',champ:'champion',
   lair_daichi:'legend',lair_ryuga:'legend',lair_kaiou:'legend',
   lair_tenku:'legend',lair_sekai:'legend',gamecorner:'city',
-  route10:'route',kojima:'forest'};
+  route10:'route',kojima:'forest',
+  hateumi:'route',hateshima:'forest',tower:'elite',lair_hate:'legend'};
 let bgm={name:null,step:0,at:0,timer:null};
 function bgmStop(){ if(bgm.timer){ clearInterval(bgm.timer); bgm.timer=null; } bgm.name=null; }
 function bgmPlay(name){
@@ -592,7 +593,19 @@ const SP={
   tenkushin:{n:'テンクウシン',t:'ひこう',b:[105,120,100,125],x:255,cr:3,c:['#1c1a2e','#d8e0f8','#8d95b8','#ffffff','#f0a030','#ffffff'],
     lv:[[1,'peck'],[1,'quick'],[30,'wing'],[40,'air'],[50,'sharpen'],[58,'blast']]},
   sekaio:{n:'セカイオー',t:'ノーマル',b:[130,135,125,110],x:300,cr:2,c:['#2a2418','#f8e8b0','#b8a060','#fffce8','#c060e0','#ffffff'],
-    lv:[[1,'slam'],[1,'harden'],[30,'bodyguard'],[45,'blast'],[55,'air'],[65,'hydro']]}
+    lv:[[1,'slam'],[1,'harden'],[30,'bodyguard'],[45,'blast'],[55,'air'],[65,'hydro']]},
+  genbu:{n:'ゲンブガメ',t:'いわ',b:[92,84,124,38],x:190,cr:45,c:['#231f1c','#7f8a72','#4e5748','#b4bfa4','#6a5a42','#ffffff'],
+    lv:[[1,'rock'],[1,'harden'],[30,'blast'],[40,'slam'],[50,'sharpen'],[58,'bodyguard']]},
+  kagero:{n:'カゲロヲ',t:'むし',b:[68,92,64,118],x:185,cr:60,c:['#1e2a1a','#9ae0c0','#4a8a70','#d8fff0','#f0d060','#ffffff'],
+    lv:[[1,'quick'],[1,'pin'],[30,'bite'],[40,'air'],[50,'sharpen'],[58,'slam']]},
+  enguma:{n:'エンオウグマ',t:'ほのお',b:[96,118,80,66],x:195,cr:45,c:['#4a1810','#ff8a3c','#c04a10','#ffd08a','#ffe850','#ffffff'],
+    lv:[[1,'fang'],[1,'growl'],[30,'flame'],[40,'slam'],[50,'sharpen'],[58,'bodyguard']]},
+  rasetsu:{n:'ラセツライ',t:'でんき',b:[74,112,70,116],x:195,cr:45,c:['#3a2a0c','#ffe04c','#c0a010','#fff8b0','#f04030','#ffffff'],
+    lv:[[1,'shock'],[1,'quick'],[30,'wave'],[40,'bolt'],[50,'sharpen'],[58,'air']]},
+  jukaio:{n:'ジュカイオウ',t:'くさ',b:[104,96,104,52],x:190,cr:45,c:['#16301c','#4fa84a','#2a6a2e','#8ede76','#7a5a30','#ffffff'],
+    lv:[[1,'vine'],[1,'harden'],[30,'leaf'],[40,'synth'],[50,'solar'],[58,'bodyguard']]},
+  hateno:{n:'ハテノカミ',t:'ひこう',b:[120,128,110,122],x:290,cr:2,c:['#1a1830','#c8d8ff','#6878b0','#ffffff','#f0c040','#ffffff'],
+    lv:[[1,'peck'],[1,'quick'],[30,'wing'],[45,'air'],[55,'bodyguard'],[65,'blast']]}
 };
 const DEXORDER=Object.keys(SP);
 
@@ -1405,7 +1418,109 @@ honomera:[
 "....04444440....",
 ".....044440.....",
 "......4444......",
-"................"]
+"................"],
+genbu:[
+"................",
+"...0000000000...",
+"..044444444440..",
+".04411111111440.",
+"0441133333311440",
+"0411333333331140",
+"0413366336633140",
+"0413367336733140",
+"0411333333331140",
+"0441133333311440",
+".04411111111440.",
+"..044444444440..",
+"...0000000000...",
+"..0110....0110..",
+"..0000....0000..",
+"................"],
+kagero:[
+".....000000.....",
+".....011110.....",
+".....066660.....",
+".....077770.....",
+".....011110.....",
+".03333011033330.",
+".03333011033330.",
+"..033301103330..",
+"...0330110330...",
+"......0440......",
+"......0110......",
+"......0440......",
+"......0110......",
+"......0110......",
+"......0000......",
+"................"],
+enguma:[
+"..000......000..",
+"..0110....0110..",
+"...0000000000...",
+"..011111111110..",
+"..011661166110..",
+"..011771177110..",
+"..011113311110..",
+"..011137731110..",
+"...0111111110...",
+"....00000000....",
+"..044444444440..",
+".04411111111440.",
+".04113333331140.",
+"..041111111140..",
+"..0440....0440..",
+"..0000....0000.."],
+rasetsu:[
+"....4......4....",
+"...444....444...",
+"...0000000000...",
+"..011111111110..",
+"..011661166110..",
+"..011771177110..",
+"..011111111110..",
+"..011133331110..",
+"...0111111110...",
+"....00000000....",
+"..044111111440..",
+".04411111111440.",
+".04133333333140.",
+"..041111111140..",
+"..0440....0440..",
+"..0000....0000.."],
+jukaio:[
+"...3333333333...",
+"..333333333333..",
+".03333333333330.",
+".03333333333330.",
+"..033333333330..",
+"...0333333330...",
+"....00000000....",
+".....044440.....",
+"....04666640....",
+"....04777740....",
+"....04444440....",
+"....04444440....",
+"...0444444440...",
+"..044444444440..",
+"..000000000000..",
+"................"],
+hateno:[
+"......0000......",
+".....044440.....",
+"....04366340....",
+"....04377340....",
+"....04444440....",
+".04411111111440.",
+"0441111111111440",
+"0411133333311140",
+"0411133333311140",
+".04411111111440.",
+"..044111111440..",
+"...0411111140...",
+"....04111140....",
+".....044440.....",
+"...0440..0440...",
+"...0000..0000..."]
 };
 /* 主人公・NPC（1:肌 2:服 3:ズボン 4:髪/帽子 7:黒） */
 const HERO={
@@ -1503,7 +1618,7 @@ function drawSpr(cv,x,y,sc,flip,ctx){
 }
 /* ============================ マップ ============================ */
 /* w 屋内壁 / A B C スイッチ扉 / G トレーナー扉 / O 押せる岩 */
-const SOLID='TWHS#_LwABCGOb!MK'; /* X(祭壇の入口) と D(扉) はワープなので通す */
+const SOLID='TWHS#_LwABCGOb!MKV';/* X(祭壇の入口) と D(扉) はワープなので通す */
 /* ジムバッジ。順にクリアしていくと次のエリアの門が開く */
 const BADGES=[
   {id:'midori',n:'みどりバッジ',town:'セイリュウシティ',leader:'ソウマ',t:'むし'},
@@ -2871,7 +2986,7 @@ kojima:{name:'こじま',ground:'.',rows:[
 "TWW..,,,,,,,,..WWWWT",
 "TWW.,,,,,,,,,,.WWWWT",
 "TWW.,,,!,,,,,,.WWWWT",
-"WWW.,,,,,,,,,,.WWWWT",
+"WWW.,,,,,,,,,,.WWWVW",
 "TWW.,,,,,,,,,,.WWWWT",
 "TWW..,,,,,,,,..WWWWT",
 "TWWW..,,,,,,..WWWWWT",
@@ -2879,8 +2994,11 @@ kojima:{name:'こじま',ground:'.',rows:[
 "TWWWWWWWWWWWWWWWWWWT",
 "TTTTTTTTTTTTTTTTTTTT"],
 items:{'7,6':'candy'},
-warps:[{x:0,y:7,to:'route10',tx:28,ty:6}],
+warps:[{x:0,y:7,to:'route10',tx:28,ty:6},{x:19,y:7,to:'hateumi',tx:1,ty:6}],
 npcs:[
+ {x:13,y:7,pal:'boy',dir:'right',nm:'うみを みる ひと',
+  say:['ひがしの うみに おおきな うずしおが ある。','あれは でんどう入りした ものの まえでしか','しずまらないと いわれている。'],
+  say2:['うずしおが しずまったな!','この さきに 「はての島」が ある。','タワーの ちょうせんしゃたちが まっているぞ。']},
  {x:11,y:2,pal:'girl',dir:'down',nm:'しまのぬし',
   say:['よく ここまで きたね。','この すなはまには うみの ぬしが あらわれる。','リュウグウジ… いちど みてみたいものだ。']}
 ],
@@ -2888,6 +3006,118 @@ signs:{},
 enc:{lv:[34,42],list:[['ryuguji',20],['sameja',22],['shinjuhime',20],['kuraget',18],['tatsunomi',12],['shinkaio',8]]},
 surf:{lv:[32,40],list:[['ryuguji',18],['sameja',24],['shinjuhime',20],['kuraget',20],['shinkaio',10],['tatsunomi',8]]}},
 
+/* --- ここから 殿堂入り後。こじまの東の かいりゅうを こえた さきにある --- */
+hateumi:{name:'はての かいりゅう',ground:'.',rows:[
+"TTTTTTTTTTTTTTTTTTTTTTTT",
+"TWWWWWWWWWWWWWWWWWWWWWWT",
+"TWWWWWW....WWWWWWWWWWWWT",
+"TWWWWWW.!..WWWWWWWWWWWWT",
+"TWWWWWW....WWWWWWWWWWWWT",
+"TWWWWWWWWWWWWWWWWWWWWWWT",
+"WWWWWWWWWWWWWWWWWWWWWWWW",
+"TWWWWWWWWWWWWWWWWWWWWWWT",
+"TWWWWWWWWWWWWWW....WWWWT",
+"TWWWWWWWWWWWWWW..!.WWWWT",
+"TWWWWWWWWWWWWWW....WWWWT",
+"TTTTTTTTTTTTTTTTTTTTTTTT"],
+items:{'8,3':'uball','17,9':'mrevive'},
+warps:[{x:0,y:6,to:'kojima',tx:17,ty:7},{x:23,y:6,to:'hateshima',tx:1,ty:6}],
+npcs:[
+ {x:9,y:3,pal:'boy',dir:'down',nm:'ながされた ふなのり',
+  trainer:{party:[['uzushio',60],['shinkaio',61],['ryuguji',62]],money:24000,
+   pre:['この かいりゅうを こえられるのは','でんどう入りした ものだけだと きいた。','ほんとうか どうか、たしかめさせてもらう!'],
+   win:['…なるほど。ほんものだ。'],
+   after:['はての島には タワーが あるらしい。','わたしも いつか いってみたい。']}}
+],
+signs:{},
+enc:null,
+surf:{lv:[56,62],list:[['ryuguji',24],['shinkaio',20],['shinjuhime',18],['sameja',18],['uzushio',12],['kuraget',8]]},
+fish:{lv:[58,64],list:[['shinkaio',30],['ryuguji',26],['shinjuhime',22],['sameja',22]]}},
+
+/* --- 殿堂入り後の島。バトルタワーと ハテノカミの まつられた 祭壇がある --- */
+hateshima:{name:'はての島',ground:'.',rows:[
+"TTTTTTTTTTTTTTTTTTTTTTTT",
+"TWWWWWWWWWWWWWWWWWWWWWWT",
+"TWWW..............WWWWWT",
+"TWW................WWWWT",
+"TWW...HHHHHHHHH....WWWWT",
+"TWW...HHHHHHHHH....WWWWT",
+"WWW...HHHHYHHHH....WWWWT",
+"TWW................WWWWT",
+"TWW................WWWWT",
+"TWW..,,,,,,,,,,,,..WWWWT",
+"TWW..,,,,,!,,,,,,..WWWWT",
+"TWW..,,,,,,,,,,,,..WWWWT",
+"TWW..,,,,,,,,,,,,..WWWWT",
+"TWW................WWWWT",
+"TWW....S......X....WWWWT",
+"TWWW..............WWWWWT",
+"TWWWWWWWWWWWWWWWWWWWWWWT",
+"TTTTTTTTTTTTTTTTTTTTTTTT"],
+items:{'10,10':'candy'},
+warps:[{x:0,y:6,to:'hateumi',tx:22,ty:6},
+       {x:10,y:6,to:'tower',tx:9,ty:10},
+       {x:14,y:14,to:'lair_hate',tx:6,ty:7}],
+npcs:[
+ {x:6,y:7,pal:'prof',dir:'down',nm:'しまの けんきゅうか',
+  say:['ようこそ はての島へ。','この しまの モンスターは','ほんとうの すがたを かくさない。','どれも つよいぞ。きを つけてな。']},
+ {x:17,y:8,pal:'girl',dir:'left',nm:'たびのひと',
+  say:['タワーの うけつけで ちょうせんできるわ。','かいふくは できないから','どうぐを もっていくのを わすれずにね。']},
+ {x:15,y:13,pal:'rival',dir:'down',nm:'しまの ぬし',
+  trainer:{bgm:'boss',party:[['genbu',64],['enguma',65],['rasetsu',66]],money:30000,
+   pre:['ここから さきは かみの ばしょだ。','とおりたければ わたしを たおしていけ。'],
+   win:['…いけ。かみが まっている。'],
+   after:['かみは にげはしない。','じゅんびが できたら いくといい。']}}
+],
+signs:{'7,14':['「はての島」','ここは せかいの はて。','いきどまりの さきに なにが あるのか。']},
+enc:{lv:[58,66],list:[['genbu',20],['kagero',22],['enguma',18],['rasetsu',18],['jukaio',22]]},
+surf:{lv:[56,64],list:[['ryuguji',26],['shinkaio',22],['shinjuhime',20],['sameja',20],['kuraget',12]]}},
+
+/* --- バトルタワー。7れんせんの ちょうせんが できる --- */
+tower:{name:'バトルタワー',rows:[
+"wwwwwwwwwwwwwwwwwwww",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wffffffffffffffffffw",
+"wfffffffffeffffffffw",
+"wwwwwwwwwwwwwwwwwwww"],
+warps:[{x:9,y:11,to:'hateshima',tx:10,ty:7}],
+npcs:[
+ {x:9,y:2,pal:'nurse',dir:'down',nm:'タワーの うけつけ',tower:1},
+ {x:14,y:5,pal:'girl',dir:'down',nm:'メダル こうかんじょ',medal:1},
+ {x:4,y:5,pal:'nurse',dir:'down',nm:'ナース',heal:1},
+ {x:4,y:8,pal:'shop',dir:'down',nm:'てんいん',shop:1},
+ {x:14,y:8,pal:'prof',dir:'down',nm:'きろくがかり',record:1},
+ {x:7,y:9,pal:'boy',dir:'right',nm:'ちょうせんしゃ',
+  say:['ここでは かいふくアイテムしか つかえない。','ボールを なげても つかまらないぞ。','1かい まけたら そこで おわりだ。']}
+],
+signs:{},enc:null,indoor:1},
+
+/* --- ハテノカミの 祭壇。殿堂入り後の さいごの でんせつ --- */
+lair_hate:{name:'はての ま',ground:'~',rows:[
+"_____________",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~~~~~~~_",
+"_~~~~~X~~~~~_",
+"_____________"],
+warps:[{x:6,y:7,to:'hateshima',tx:14,ty:15}],
+npcs:[
+ {x:6,y:3,mon:'hateno',nm:'hateno',hide:'leg_lair_hate',
+  legend:{id:'hateno',lv:72,flag:'leg_lair_hate',
+   pre:['そらが われた。','はての かみが まいおりる ——']}}
+],
+signs:{},enc:null},
 /* --- ジム6 くさ: 生垣の迷路。トレーナー全員を倒すと最奥の扉が開く --- */
 midorigym:{name:'ミドリジム',puz:1,rows:[
 "wwwwwwwwwwwwwwwwwwww",
@@ -3060,6 +3290,18 @@ function drawTile(ch,px_,py,wx,wy){
       g.fillStyle='#3f78d8'; g.fillRect(px_,py+4,16,4); g.fillRect(px_,py+12,16,3);
       const o=Math.floor(Math.sin(tick/22+wx*0.9+wy*0.5)*3);
       g.fillStyle='#8fc4ff'; g.fillRect(px_+3+o,py+5,5,1); g.fillRect(px_+9-o,py+13,4,1);
+      break;}
+    case 'V':{                                       /* うずしお */
+      g.fillStyle='#1d3f80'; g.fillRect(px_,py,16,16);
+      const t=tick/9+wx+wy;
+      g.fillStyle='#2f5fb8'; g.fillRect(px_+1,py+1,14,14);
+      for(let i=0;i<3;i++){
+        const rr=5-i*1.6, a=t+i*2.1;
+        g.fillStyle=i===0?'#8fc4ff':i===1?'#5f9ae8':'#3f78d8';
+        g.fillRect(px_+8+Math.round(Math.cos(a)*rr)-1,py+8+Math.round(Math.sin(a)*rr)-1,3,3);
+        g.fillRect(px_+8-Math.round(Math.cos(a)*rr)-1,py+8-Math.round(Math.sin(a)*rr)-1,2,2);
+      }
+      g.fillStyle='#0e2450'; g.fillRect(px_+7,py+7,2,2);
       break;}
     case 'R': g.fillStyle='#c4ab7e'; g.fillRect(px_,py,16,16);
       g.fillStyle='#b09468'; for(let i=0;i<5;i++){ const r=hsh(wx,wy,i); g.fillRect(px_+Math.floor(r*15),py+Math.floor(hsh(wx,wy,i+9)*15),2,1); }
@@ -3265,7 +3507,7 @@ const shopStock=()=>badgeCount()>=4?SHOPLIST.concat(SHOPLIST2):SHOPLIST;
 let G=null;
 function newGame(){
   G={map:'town',x:9,y:15,dir:'up',party:[],box:[],
-     bag:{ball:5,potion:3},money:1500,coins:0,dex:{},flags:{},badges:{},
+     bag:{ball:5,potion:3},money:1500,coins:0,medal:0,dex:{},flags:{},badges:{},
      hm:{},visited:{town:1},surf:0,steps:0,play:0};
 }
 const SAVEKEY='monsterquest_v1';
@@ -3277,6 +3519,7 @@ function load(){
     /* 旧セーブとの互換: 後から足したフィールドを補う */
     if(!G.badges) G.badges={};
     if(typeof G.coins!=='number') G.coins=0;
+    if(typeof G.medal!=='number') G.medal=0;
     if(!G.hm) G.hm={};
     if(!G.visited) G.visited={town:1};
     if(tileAt(MAPS[G.map],G.x,G.y)!=='W') G.surf=0;
@@ -3308,6 +3551,8 @@ function tileAt(mp,x,y){
   const c=r[y][x];
   if(c==='!') return (G&&G.flags['i_'+mp.key+'_'+x+'_'+y])?(mp.ground||'.'):'!';
   if(c==='K') return (G&&G.flags['cut_'+mp.key+'_'+x+'_'+y])?(mp.ground||'.'):'K';
+  /* うずしお。でんどう入りすると しずまって わたれる みずになる */
+  if(c==='V') return (G&&G.flags.ending)?'W':'V';
   if(c==='G') return gateOpen(mp)?'f':'G';
   if(puz&&puz.map===mp.key){
     const o=puz.ov[x+','+y]; if(o!==undefined) return o;
@@ -3442,6 +3687,9 @@ async function talk(n){
   if(n.hm){ await giveHM(n); ui.busy=false; return; }
   if(n.coin){ await coinShop(n); ui.busy=false; return; }
   if(n.prize){ await prizeShop(n); ui.busy=false; return; }
+  if(n.tower){ await towerDesk(n); ui.busy=false; return; }
+  if(n.medal){ await medalShop(n); ui.busy=false; return; }
+  if(n.record){ await recordDesk(n); ui.busy=false; return; }
   if(n.legend){
     if(!alive().length){ await say('たたかえる モンスターが いない!'); ui.busy=false; return; }
     for(const l of n.legend.pre) await say(l);
@@ -3466,7 +3714,24 @@ async function talk(n){
   if(n.trainer){
     const done=G.flags['t_'+G.map+'_'+n.x+'_'+n.y];
     const tr=n.trainer;
-    if(done){ for(const l of tr.after) await say(l,{name:n.nm}); ui.busy=false; return; }
+    if(done){
+      for(const l of tr.after) await say(l,{name:n.nm});
+      /* でんどう入り後は 四天王とチャンピオンに なんども いどめる（レベルは +12） */
+      if(G.flags.ending && (tr.champ||tr.bgm==='elite')){
+        await say('もういちど しょうぶするか?',{name:n.nm,keep:true});
+        const y=await choose(['たたかう','やめる'],{x:96,y:60,w:60,cols:1,cancel:true});
+        ui.text=null;
+        if(y===0){
+          const spec=tr.champ?champParty():tr.party;
+          ui.busy=false;
+          battle({trainer:{name:n.nm,party:spec.map(([id,lv])=>mk(id,lv+12)),
+                           money:Math.floor((tr.money||0)/2),bgm:tr.bgm,champ:tr.champ,
+                           win:tr.win}});
+          return;
+        }
+      }
+      ui.busy=false; return;
+    }
     for(const l of tr.pre) await say(l,{name:n.nm});
     ui.busy=false;
     const spec=tr.rival?rivalParty(1):tr.rival2?rivalParty(2):tr.rival3?rivalParty(3)
@@ -3733,6 +3998,7 @@ async function battle(o){
   const prev=scene; scene='battle'; ui.busy=true;
   const isTr=!!o.trainer;
   const friendly=isTr&&o.trainer.friendly;
+  const tower=isTr&&!!o.trainer.tower;    /* バトルタワーの れんせん */
   /* 戦闘の種類ごとに曲を変える。トレーナー側で bgm を指定もできる */
   const kind=o.legend?'legend'
     :isTr?(o.trainer.bgm||(o.trainer.champ?'champion':o.trainer.badge?'gym':'boss'))
@@ -3788,7 +4054,7 @@ async function battle(o){
     await endTurnStatus('me'); await endTurnStatus('foe');
     const f=await faintCheck();
     if(f==='foe'){
-      if(!friendly) await gainExp();
+      if(!friendly&&!tower) await gainExp();
       if(isTr && bt.ei<o.trainer.party.length-1){
         bt.ei++; bt.foe=o.trainer.party[bt.ei]; resetB(bt.foe); bt.df=bt.foe.hp;
         bt.anim.fh=0; seen(bt.foe.id);
@@ -3798,9 +4064,10 @@ async function battle(o){
           await say(o.trainer.name+'に かった!');
           for(const l of o.trainer.win) await say(l,{name:o.trainer.name});
         } else if(isTr){
-          const mn=o.trainer.money; G.money=Math.min(999999,G.money+mn);
+          const mn=o.trainer.money||0;
           await say(o.trainer.name+'に かった!');
-          await say('しょうきんとして '+mn+'えんを てにいれた!');
+          if(mn>0){ G.money=Math.min(999999,G.money+mn);
+            await say('しょうきんとして '+mn+'えんを てにいれた!'); }
           for(const l of o.trainer.win) await say(l,{name:o.trainer.name});
           if(o.trainer.key) G.flags[o.trainer.key]=1;
           if(o.trainer.champ) G.flags.champion=1;
@@ -3842,7 +4109,7 @@ async function battle(o){
     if(result==='lose') await say('ともだちに まけてしまった…');
     await say('※ つうしんたいせんは ぼうけんの きろくに えいきょう しません。');
     ui.busy=false;
-  } else if(result==='lose'){
+  } else if(result==='lose'&&!tower){
     ui.busy=true;
     await say('めのまえが まっくらに なった…');
     G.money=Math.floor(G.money/2);
@@ -3852,7 +4119,7 @@ async function battle(o){
     await say('モンスターたちは かいふく した!');
     ui.busy=false;
   }
-  if(result==='win'&&!friendly&&badgeCount()>=BADGES.length&&!G.flags.allbadge){
+  if(result==='win'&&!friendly&&!tower&&badgeCount()>=BADGES.length&&!G.flags.allbadge){
     G.flags.allbadge=1; ui.busy=true;
     await say('—— 8つの バッジが すべて そろった。');
     await say('オワリ町の きたに 「チャンピオンロード」が ひらいた!');
@@ -3860,13 +4127,15 @@ async function battle(o){
     await say('リーグへ いどむ じゅんびを して いこう!');
     ui.busy=false; save();
   }
-  if(result==='win'&&!friendly&&G.flags.champion&&!G.flags.ending){
+  if(result==='win'&&!friendly&&!tower&&G.flags.champion&&!G.flags.ending){
     G.flags.ending=1; ui.busy=true;
     await say('—— きみは チャンピオンに なった。');
     await say('ハジマリの町から ここまで、とても ながい たびだった。');
     await say('つかまえた モンスターは '+DEXORDER.filter(i=>G.dex[i]===2).length+'／'+DEXORDER.length+'しゅるい。');
     await say('きみと モンスターたちの なまえは','えいえんに でんどう入りだ!');
     await say('—— おめでとう! ぼうけんは まだ つづく!');
+    /* でんどう入りの きろく。タワーの きろくがかりが みせてくれる */
+    G.hof={n:(G.hof?G.hof.n:0)+1,party:G.party.map(m=>({n:m.name,lv:m.lv}))};
     for(const m of G.party){ m.hp=m.max; m.st=null; m.slp=0; }
     G.map='town'; G.x=5; G.y=5; G.dir='up'; mv=null; G.surf=0;
     initPuz('town'); bgmSync(); ui.banner={t:MAPS.town.name,n:110};
@@ -3874,6 +4143,7 @@ async function battle(o){
     await say('モンスターたちは すっかり げんきだ!');
     ui.busy=false; save();
   }
+  return result;
 }
 /* ============================ 各種メニュー ============================ */
 const hpCol=r=>r>0.5?'#4fd06a':r>0.2?'#f0c840':'#e8503c';
@@ -4481,7 +4751,8 @@ const FLYPT=[
  {k:'kazanmachi',n:'カザン町',          x:9,y:11},
  {k:'midori',    n:'ミドリ台',          x:9,y:11},
  {k:'sorami',    n:'ソラミ台',          x:9,y:11},
- {k:'owari',     n:'オワリ町',          x:9,y:11}
+ {k:'owari',     n:'オワリ町',          x:9,y:11},
+ {k:'hateshima',  n:'はての島',          x:10,y:8}
 ];
 const canFlyHere=()=>!!(G&&!M().indoor&&!M().nofly);
 async function useFly(){
@@ -4813,7 +5084,7 @@ async function bagField(){
     const {ks,items}=bagItems();
     if(!ks.length){ await say('どうぐを もっていない。'); return; }
     const c=await choose(items,{x:6,y:16,w:148,cols:1,cancel:true,max:6,
-      title:'どうぐ  '+G.money+'えん'+(G.coins?'  コイン'+G.coins:''),
+      title:'どうぐ  '+G.money+'えん'+(G.coins?'  コイン'+G.coins:'')+(G.medal?'  メダル'+G.medal:''),
       onMove:i=>{ ui.shopDesc=ks[i]?ITEMS[ks[i]].ds:''; }});
     ui.shopDesc=null;
     if(c<0) return;
@@ -4850,6 +5121,162 @@ async function dexScreen(){
     onMove:i=>{ ui.dexSel=(G.dex[DEXORDER[i]]?DEXORDER[i]:null); }});
   ui.dexSel=null;
 }
+/* ============================ バトルタワー ============================ */
+/* 殿堂入り後の やりこみ。れんせんを かちぬくと メダルが もらえる。
+   とちゅうで かいふくは できない（どうぐは つかえる）。
+   てもちの HP と PP は ちょうせんの まえに ひかえて、おわったら もどす。 */
+const TCOURSE=[
+  {id:'b',n:'ビギナー',  lv:52,win:3,med:3,  ds:'Lv52 3れんせん'},
+  {id:'e',n:'エキスパート',lv:62,win:5,med:8,  ds:'Lv62 5れんせん'},
+  {id:'m',n:'マスター',  lv:72,win:7,med:20, ds:'Lv72 7れんせん'}
+];
+/* タワーに でてくる モンスター。でんせつは のぞく */
+const TPOOL=['jukario','burnix','aquare','oononezu','tenkuga','gigakuwaga','gansekio',
+  'enblaze','elekyu','uzushio','sorahane','kabutoga','shinkaio','ryuguji','sameja',
+  'shinjuhime','genbu','kagero','enguma','rasetsu','jukaio'];
+const TNAME=['ふなのり','やまおとこ','エリートトレーナー','ちょうせんしゃ','たびのしょうじょ',
+  'かくとうか','しおかぜの おとこ','そらの たびびと','いわくだき','タワーの ぬし'];
+const TSAY=[
+ ['ここまで きたか。','だが わたしは とおさない!'],
+ ['つぎは わたしの ばんだ。','いくぞ!'],
+ ['まだ てもちは もつか?','ここで おわりだ!'],
+ ['タワーの かべは たかいぞ。','こえられるか!'],
+ ['いい かおを している。','だからこそ たおしがいが ある!']
+];
+function towerFoe(course,streak){
+  const lv=course.lv+Math.min(4,streak);
+  const party=[];
+  const used={};
+  for(let i=0;i<3;i++){
+    let id;
+    do{ id=TPOOL[Math.floor(Math.random()*TPOOL.length)]; }while(used[id]&&Object.keys(used).length<TPOOL.length);
+    used[id]=1;
+    party.push(mk(id,lv+ri(-1,1)));
+  }
+  return {name:TNAME[Math.floor(Math.random()*TNAME.length)],
+          party,say:TSAY[Math.floor(Math.random()*TSAY.length)]};
+}
+async function towerRun(n,course){
+  /* ちょうせんの まえの じょうたいを ひかえる */
+  const snap=G.party.map(m=>({hp:m.hp,st:m.st,slp:m.slp,pp:m.mv.map(s=>s.pp)}));
+  const back={map:G.map,x:G.x,y:G.y,dir:G.dir};
+  let streak=0;
+  for(let i=0;i<course.win;i++){
+    const foe=towerFoe(course,i);
+    await say((i+1)+'かいせん! あいては '+foe.name+'!');
+    for(const l of foe.say) await say(l,{name:foe.name});
+    ui.busy=false;
+    const r=await battle({trainer:{name:foe.name,party:foe.party,money:0,tower:1,
+      bgm:i===course.win-1?'boss':'battle',
+      win:['…つよいな。つぎへ すすめ。']}});
+    ui.busy=true;
+    /* たたかいの あと 位置が うごいていたら もどす */
+    G.map=back.map; G.x=back.x; G.y=back.y; G.dir=back.dir;
+    if(r!=='win'){
+      await say('ざんねん! '+streak+'れんしょうで おわった。',{name:n.nm});
+      break;
+    }
+    streak++;
+    if(i<course.win-1) await say('かちぬいた! つづけて '+(i+2)+'かいせんだ!',{name:n.nm});
+  }
+  /* HP と PP を もとに もどす */
+  G.party.forEach((m,i)=>{ const q=snap[i]; if(!q) return;
+    m.hp=q.hp; m.st=q.st; m.slp=q.slp; m.mv.forEach((s,j)=>{ s.pp=q.pp[j]; }); });
+  if(streak>=course.win){
+    sfx('catch'); ui.flashScreen=20;
+    await say('—— ぜんしょう! みごとです!',{name:n.nm});
+    G.medal=(G.medal||0)+course.med;
+    await say('タワーメダルを '+course.med+'まい てにいれた!');
+    G.tbest=G.tbest||{};
+    if(!G.tbest[course.id]){ G.tbest[course.id]=1;
+      await say(course.n+'コースを はじめて せいはしました!',{name:n.nm}); }
+  }
+  G.twin=G.twin||{};
+  if((G.twin[course.id]||0)<streak) G.twin[course.id]=streak;
+  await say('てもちの じょうたいを もとに もどしました。',{name:n.nm});
+  save();
+}
+async function towerDesk(n){
+  await say('バトルタワーへ ようこそ!',{name:n.nm});
+  while(true){
+    const items=TCOURSE.map(c=>({t:c.n,r:c.ds}));
+    items.push({t:'ルールを きく',r:''});
+    items.push({t:'やめる',r:''});
+    const c=await choose(items,{x:6,y:20,w:148,cols:1,cancel:true,max:5,
+      title:'コース  メダル '+(G.medal||0)+'まい'});
+    if(c<0||c===TCOURSE.length+1) break;
+    if(c===TCOURSE.length){
+      await say('あいては ランダムに 3たい。',{name:n.nm});
+      await say('かいふくは できませんが どうぐは つかえます。');
+      await say('ボールは つかえません。にげることも できません。');
+      await say('かちぬくと タワーメダルを さしあげます。');
+      await say('おわったら てもちは もとの じょうたいに もどります。');
+      continue;
+    }
+    const co=TCOURSE[c];
+    if(alive().length<3){ sfx('no'); await say('たたかえる モンスターが 3たい ひつようです。',{name:n.nm}); continue; }
+    const best=(G.twin&&G.twin[co.id])||0;
+    await say(co.n+'コース。'+co.ds+'。さいこうは '+best+'れんしょう。',{name:n.nm,keep:true});
+    const y=await choose(['ちょうせんする','やめる'],{x:96,y:60,w:60,cols:1,cancel:true});
+    ui.text=null;
+    if(y!==0) continue;
+    await towerRun(n,co);
+  }
+  await say('また おこしください。',{name:n.nm});
+}
+/* ---- メダル こうかんじょ ---- */
+const MEDALS=[
+  {item:'hpotion',c:2},
+  {item:'mrevive',c:4},
+  {item:'uball',c:2},
+  {item:'ether',c:2},
+  {item:'candy',c:8},
+  {mon:'genbu',lv:50,c:25},
+  {mon:'rasetsu',lv:50,c:25},
+  {mon:'kagero',lv:50,c:25}
+];
+async function medalShop(n){
+  await say('タワーメダルと こうかんできます。',{name:n.nm});
+  while(true){
+    const items=MEDALS.map(p=>({
+      t:p.item?ITEMS[p.item].n:SP[p.mon].n+' (Lv'+p.lv+')',
+      r:p.c+'まい', col:(G.medal||0)>=p.c?'#fff':'#8a8296',
+      mon:p.mon||null}));
+    items.push({t:'やめる',r:''});
+    const c=await choose(items,{x:6,y:14,w:148,cols:1,cancel:true,max:6,
+      title:'こうかん  メダル '+(G.medal||0)+'まい'});
+    if(c<0||c===MEDALS.length) break;
+    const p=MEDALS[c];
+    if((G.medal||0)<p.c){ sfx('no'); await say('メダルが たりません。',{name:n.nm}); continue; }
+    const nn=p.item?ITEMS[p.item].n:SP[p.mon].n;
+    await say(nn+'ですね。'+p.c+'まいで よろしいですか?',{name:n.nm,keep:true});
+    const y=await choose(['こうかんする','やめる'],{x:96,y:60,w:60,cols:1,cancel:true});
+    ui.text=null;
+    if(y!==0) continue;
+    G.medal-=p.c; sfx('catch');
+    if(p.item){
+      G.bag[p.item]=(G.bag[p.item]||0)+1;
+      await say(nn+'を てにいれた!');
+    } else {
+      const m=mk(p.mon,p.lv); m.name=SP[p.mon].n; resetB(m); caught(p.mon);
+      if(G.party.length<6){ G.party.push(m); await say(nn+'が なかまに くわわった!'); }
+      else { G.box.push(m); await say('てもちが いっぱい! '+nn+'は ボックスへ おくられた。'); }
+    }
+    save();
+  }
+}
+/* ---- きろくがかり。でんどう入りの きろくを みせてくれる ---- */
+async function recordDesk(n){
+  const h=G.hof||null;
+  if(!h){ await say('でんどう入りの きろくは まだ ありません。',{name:n.nm}); return; }
+  await say('でんどう入り '+h.n+'かいめ の きろくです。',{name:n.nm});
+  for(const m of h.party) await say('  '+m.n+'  Lv'+m.lv);
+  const t=G.twin||{};
+  await say('タワーの さいこう れんしょう ——',{name:n.nm});
+  for(const c of TCOURSE) await say('  '+c.n+' : '+(t[c.id]||0)+'れんしょう');
+  await say('ずかん '+DEXORDER.filter(i=>G.dex[i]===2).length+'／'+DEXORDER.length+'しゅるい。',{name:n.nm});
+}
+
 /* ============================ 描画 ============================ */
 function dspr(cv,x,y,sc){ drawSpr(cv,x*S,y*S,sc*S,false,d); }
 function ell(g,cx,cy,rx,ry,c){ g.fillStyle=c; g.beginPath(); g.ellipse(cx,cy,rx,ry,0,0,7); g.fill(); }
