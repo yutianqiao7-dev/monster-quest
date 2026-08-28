@@ -72,7 +72,8 @@ body{
   background:linear-gradient(180deg,#46425f,#332f49); box-shadow:0 2px 0 #221f33; color:#9a95bb; }
 #foot{ display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--dim); letter-spacing:.1em; padding:0 4px; }
 #foot b{ color:var(--gold); font-weight:400; letter-spacing:.22em; }
-#mute{ background:none; border:1px solid #3a3654; color:var(--dim); border-radius:5px; padding:3px 8px; font:inherit; font-size:10px; }
+#mute,#gfx{ background:none; border:1px solid #3a3654; color:var(--dim); border-radius:5px; padding:3px 8px; font:inherit; font-size:10px; }
+    #gfx{ margin-right:6px; }
 @media (max-height:620px){ .dpad{grid-template-columns:repeat(3,36px); grid-template-rows:repeat(3,36px);} .round{width:48px;height:48px;} }
 </style>
 
@@ -100,7 +101,7 @@ body{
       <button class="key pill" data-k="start">START</button>
     </div>
   </div>
-  <div id="foot"><b>MQ-01</b><button id="mute">SOUND ON</button></div>
+  <div id="foot"><b>MQ-01</b><span><button id="gfx">ART PIXEL</button><button id="mute">SOUND ON</button></span></div>
 </div>
 
 <script>
@@ -387,11 +388,177 @@ function wantBgm(){
 }
 /* 曲の切り替えはループから面倒を見る（画面遷移ごとの呼び出し漏れを防ぐ） */
 function bgmSync(){ if(!AC||muted) return; const w=wantBgm(); if(w!==bgm.name) bgmPlay(w); }
+document.getElementById('gfx').onclick=e=>{
+  setSmooth(!SMOOTH); sfx('ok');
+};
 document.getElementById('mute').onclick=e=>{
   muted=!muted;
   e.target.textContent=muted?'SOUND OFF':'SOUND ON';
   if(muted) bgmStop(); else { sfx('ok'); bgmSync(); }
 };
+
+/* ============================ なめらか表示 ============================ */
+/* おなじ 16x16の データから、かどを まるめた 絵を つくる。
+   1) いろごとに マスの あつまりを とりだす
+   2) そのふちを たどって おおきな わっかに する
+   3) チャイキン法で かどを けずって なめらかにする
+   4) ぬりつぶす（からだは たてに グラデーション）
+   ドット絵版は そのまま のこして、ボタンで きりかえる。 */
+let SMOOTH=false;                 /* なめらか表示か */
+let PR=1;                         /* 内部の えがく こまかさ */
+const SMCACHE=new Map();
+const SMSIZE=96;                  /* なめらか絵の おおきさ */
+
+/* ふちの へんを つないで わっかに する */
+function smLoops(mask,w,h){
+  const out=new Map();
+  const K=(x,y)=>x+','+y;
+  const push=(a,b,c,dd)=>{ const k=K(a,b); if(!out.has(k)) out.set(k,[]); out.get(k).push([c,dd]); };
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    if(!mask[y*w+x]) continue;
+    if(y===0||!mask[(y-1)*w+x]) push(x,y,x+1,y);
+    if(x===w-1||!mask[y*w+x+1]) push(x+1,y,x+1,y+1);
+    if(y===h-1||!mask[(y+1)*w+x]) push(x+1,y+1,x,y+1);
+    if(x===0||!mask[y*w+x-1]) push(x,y+1,x,y);
+  }
+  const loops=[];
+  const take=k=>{ const a=out.get(k); if(!a||!a.length) return null;
+    const v=a.shift(); if(!a.length) out.delete(k); return v; };
+  while(out.size){
+    const start=out.keys().next().value;
+    let cur=start; const loop=[];
+    for(let guard=0;guard<4096;guard++){
+      const nx=take(cur); if(!nx) break;
+      loop.push(cur.split(',').map(Number));
+      cur=K(nx[0],nx[1]);
+      if(cur===start){ loop.push(nx); break; }
+    }
+    if(loop.length>2) loops.push(loop);
+  }
+  return loops;
+}
+/* かどを けずって まるくする */
+function smChaikin(pts,n){
+  for(let k=0;k<n;k++){
+    const o=[];
+    for(let i=0;i<pts.length;i++){
+      const a=pts[i], b=pts[(i+1)%pts.length];
+      o.push([a[0]*0.75+b[0]*0.25,a[1]*0.75+b[1]*0.25]);
+      o.push([a[0]*0.25+b[0]*0.75,a[1]*0.25+b[1]*0.75]);
+    }
+    pts=o;
+  }
+  return pts;
+}
+function smPath(loops,rounds){
+  const pa=new Path2D();
+  for(const lp of loops){
+    const s=smChaikin(lp,rounds);
+    pa.moveTo(s[0][0],s[0][1]);
+    for(let i=1;i<s.length;i++) pa.lineTo(s[i][0],s[i][1]);
+    pa.closePath();
+  }
+  return pa;
+}
+/* ドット絵から なめらかな 絵を やく */
+function bakeSmooth(rows,pal,key){
+  if(SMCACHE.has(key)) return SMCACHE.get(key);
+  const H0=rows.length, W0=rows[0].length;
+  const cv=document.createElement('canvas'); cv.width=SMSIZE; cv.height=SMSIZE;
+  const g=cv.getContext('2d');
+  const sc=SMSIZE/16;
+  g.setTransform(sc,0,0,sc,0,0);
+  g.lineJoin='round'; g.lineCap='round';
+  const maskFor=test=>{
+    const m=new Uint8Array(W0*H0);
+    for(let y=0;y<H0;y++) for(let x=0;x<W0;x++){
+      const ch=rows[y][x];
+      if(ch!=='.'&&ch!==' '&&test(ch)) m[y*W0+x]=1;
+    }
+    return m;
+  };
+  const draw=(test,style,rounds)=>{
+    const m=maskFor(test);
+    let area=0; for(let i=0;i<m.length;i++) area+=m[i];
+    if(!area) return null;
+    const lp=smLoops(m,W0,H0);
+    if(!lp.length) return null;
+    /* ほそい ぶぶんを まるめすぎると きえてしまう */
+    let x0=99,x1=-1,y0=99,y1=-1;
+    for(let y=0;y<H0;y++) for(let x=0;x<W0;x++) if(m[y*W0+x]){
+      if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+    const thin=Math.min(x1-x0+1,y1-y0+1);
+    const r=rounds!==undefined?rounds:(thin<=2?1:2);
+    const pa=smPath(lp,r);
+    g.fillStyle=style; g.fill(pa,'evenodd');
+    return pa;
+  };
+  const RN=2;                       /* まるめすぎると ほそい ぶぶんが とける */
+  /* 1) そとがわ = 輪郭いろ */
+  const outline=pal['0']||'#1a1626';
+  draw(()=>true,outline,RN);
+  /* 2) からだ = 主色の たてグラデーション */
+  const body=pal['1']||pal['3']||'#c0c0c0';
+  const lit=pal['3']||body, shd=pal['2']||outline;
+  const gr=g.createLinearGradient(0,1,0,15);
+  gr.addColorStop(0,lit); gr.addColorStop(0.45,body); gr.addColorStop(1,shd);
+  draw(ch=>ch!=='0',gr,RN);
+  /* 3) こまかい ぶぶんは じゅんに かさねる */
+  for(const ch of ['2','3','4','5','6','7']){
+    const c=pal[ch]; if(!c) continue;
+    draw(x=>x===ch,c);
+  }
+  /* 4) うえからの ひかりを うっすら のせる */
+  const inner=maskFor(ch=>ch!=='0');
+  const ilp=smLoops(inner,W0,H0);
+  if(ilp.length){
+    const ip=smPath(ilp,RN);
+    g.save(); g.clip(ip,'evenodd');
+    const hg=g.createLinearGradient(0,0,0,16);
+    hg.addColorStop(0,'rgba(255,255,255,0.30)');
+    hg.addColorStop(0.4,'rgba(255,255,255,0.05)');
+    hg.addColorStop(0.75,'rgba(0,0,0,0)');
+    hg.addColorStop(1,'rgba(0,0,0,0.22)');
+    g.fillStyle=hg; g.fillRect(0,0,16,16);
+    g.restore();
+  }
+  /* 5) りんかくを なぞって しめる */
+  const all=maskFor(()=>true);
+  const lp=smLoops(all,W0,H0);
+  if(lp.length){
+    g.strokeStyle=outline; g.lineWidth=0.6;
+    g.stroke(smPath(lp,RN));
+  }
+  g.setTransform(1,0,0,1,0,0);
+  SMCACHE.set(key,cv);
+  return cv;
+}
+/* なめらか表示では タイルの かざりの かどを まるめる。
+   マスいっぱいの ぬりつぶし（16x16）は そのまま にして すきまを つくらない */
+const CAN_RR=typeof CanvasRenderingContext2D!=='undefined'
+  && !!CanvasRenderingContext2D.prototype.roundRect;
+function tileRound(on){
+  if(on && CAN_RR && !p.__rr){
+    p.__rect=p.fillRect.bind(p);
+    p.fillRect=(x,y,w,h)=>{
+      if(w>=16||h>=16||w<2||h<2){ p.__rect(x,y,w,h); return; }
+      const r=Math.min(1.3,Math.min(w,h)/2.4);
+      p.beginPath(); p.roundRect(x,y,w,h,r); p.fill();
+    };
+    p.__rr=1;
+  } else if((!on||!CAN_RR) && p.__rr){ p.fillRect=p.__rect; p.__rr=0; }
+}
+/* 表示の きりかえ。localStorage に おぼえる */
+function setSmooth(v){
+  SMOOTH=!!v; PR=SMOOTH?3:1;
+  pix.width=W*PR; pix.height=H*PR;
+  p.setTransform(PR,0,0,PR,0,0);
+  p.imageSmoothingEnabled=SMOOTH;
+  if(p.__rr){ p.fillRect=p.__rect; p.__rr=0; }
+  try{ localStorage.setItem('mq_smooth',SMOOTH?'1':'0'); }catch(e){}
+  const b=document.getElementById('gfx');
+  if(b) b.textContent=SMOOTH?'ART SMOOTH':'ART PIXEL';
+}
 
 /* ============================ 入力 ============================ */
 const held={up:0,down:0,left:0,right:0};
@@ -3398,13 +3565,15 @@ function bake(rows,pal,key){
   }
   CACHE.set(key,cv); return cv;
 }
-function monSpr(id){ return bake(ART[id],monPal(id),'m'+id); }
+function monSpr(id){ return SMOOTH?bakeSmooth(ART[id],monPal(id),'s'+id)
+                                 :bake(ART[id],monPal(id),'m'+id); }
 function heroSpr(k,dir){
   const dd=(dir==='left'||dir==='right')?'side':(HERO[dir]?dir:'down');
-  return bake(HERO[dd],heroPal(k),'h'+k+dd);
+  return SMOOTH?bakeSmooth(HERO[dd],heroPal(k),'sh'+k+dd)
+               :bake(HERO[dd],heroPal(k),'h'+k+dd);
 }
 function drawSpr(cv,x,y,sc,flip,ctx){
-  const g=ctx||p; g.imageSmoothingEnabled=false;
+  const g=ctx||p; g.imageSmoothingEnabled=SMOOTH;
   g.save();
   if(flip){ g.translate(x+16*sc,y); g.scale(-1,1); g.drawImage(cv,0,0,16*sc,16*sc); }
   else g.drawImage(cv,x,y,16*sc,16*sc);
@@ -5602,8 +5771,10 @@ function drawField(){
   p.fillStyle='#000'; p.fillRect(0,0,W,H);
   const t0=Math.floor(cam.x/16), t1=Math.ceil((cam.x+W)/16);
   const s0=Math.floor(cam.y/16), s1=Math.ceil((cam.y+H)/16);
+  tileRound(SMOOTH);
   for(let y=s0;y<=s1;y++) for(let x=t0;x<=t1;x++)
     drawTile(tileAt(mp,x,y),x*16-cam.x,y*16-cam.y,x,y);
+  tileRound(false);
   const ents=[];
   for(const n of (mp.npcs||[])){
     if(npcGone(n)) continue;
@@ -7785,8 +7956,9 @@ function draw(){
   else if(scene==='title') drawTitle();
   else if(scene==='field') drawField();
   d.clearRect(0,0,disp.width,disp.height);
-  d.imageSmoothingEnabled=false;
+  d.imageSmoothingEnabled=SMOOTH;
   d.drawImage(pix,0,0,disp.width,disp.height);
+  d.imageSmoothingEnabled=false;
   if(ui.flashScreen>0){ ui.flashScreen--; d.fillStyle='rgba(255,255,255,'+(ui.flashScreen/26)+')'; d.fillRect(0,0,disp.width,disp.height); }
   if(scene==='title') drawTitleUI();
   if(scene==='battle'&&bt&&!ui.evo) drawBattleUI();
@@ -7897,6 +8069,7 @@ function loop(){
   requestAnimationFrame(loop);
 }
 migrateSave();
+try{ setSmooth(localStorage.getItem('mq_smooth')==='1'); }catch(e){ setSmooth(false); }
 fit(); scene='title'; loop();
 setInterval(()=>{ if(G&&scene==='field'&&!ui.busy) G.play++; },1000);
 
