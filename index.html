@@ -6490,6 +6490,18 @@ async function showCode(title,code){
   await say(copied?'クリップボードに コピーした!':'コードを ともだちに おくってね。');
 }
 const askCode=msg=>((window.prompt(msg,'')||'').trim());
+/* あいことばを おおきく 出して、あいてが 打つのを まつ */
+async function showPass(code){
+  await say('あいことばは 「'+code+'」!',{keep:true});
+  ui.pass=code;
+}
+/* あいことばを うちこむ。つかわない 文字は すてる */
+function askPass(){
+  const raw=(window.prompt('ホストの あいことば 5もじを いれてね','')||'').toUpperCase();
+  let out='';
+  for(const ch of raw) if(CODEA.includes(ch)) out+=ch;
+  return out.slice(0,5);
+}
 
 /* ---------------- 1) チームコード対戦 ---------------- */
 async function codeBattleMenu(){
@@ -6548,7 +6560,12 @@ async function unpackSig(str){
   return null;
 }
 function netClose(){
-  if(net){ try{ net.dc&&net.dc.close(); }catch(e){} try{ net.pc&&net.pc.close(); }catch(e){} }
+  if(net){
+    try{ net.dc&&net.dc.close(); }catch(e){}
+    try{ net.pc&&net.pc.close(); }catch(e){}
+    try{ net.beat&&clearInterval(net.beat); }catch(e){}
+    try{ net.ws&&net.ws.close(); }catch(e){}
+  }
   net=null; netQ=[]; if(netWait){ const r=netWait; netWait=null; r(); }
 }
 function netSend(o){ try{ if(net&&net.dc&&net.dc.readyState==='open') net.dc.send(JSON.stringify(o)); }catch(e){} }
@@ -6578,6 +6595,134 @@ async function waitIce(pc){
     const t=setTimeout(fin,4000);
     pc.addEventListener('icegatheringstatechange',h);
   });
+}
+/* ---------------- あいことば方式（みじかい パスワード） ----------------
+   ホストが 5もじの あいことばを 出し、あいてが それを 打つだけ。
+   おたがいの つなぎ先を おしえあう「まちあわせ所」だけ そとの
+   サーバー（PeerServer の おおやけの ブローカー）を つかう。
+   たたかいの データは これまでどおり 端末どうし 直接 やりとりする。 */
+const SIGHOST='wss://0.peerjs.com/peerjs?key=peerjs&version=1.5.4';
+const CODEA='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';   /* 0O1I は のぞく */
+const newCode=()=>{ let s=''; for(let i=0;i<5;i++) s+=CODEA[Math.floor(Math.random()*32)]; return s; };
+const peerIdOf=code=>'mqv1'+code.toUpperCase();
+const rndId=()=>'mqg'+Math.random().toString(36).slice(2,10);
+
+/* まちあわせ所に つなぐ。OPEN が くるまで まつ */
+function sigOpen(id){
+  return new Promise((res,rej)=>{
+    let ws;
+    try{ ws=new WebSocket(SIGHOST+'&id='+encodeURIComponent(id)
+                          +'&token='+Math.random().toString(36).slice(2,10)); }
+    catch(e){ rej(e); return; }
+    const to=setTimeout(()=>{ try{ws.close();}catch(e){} rej(new Error('timeout')); },12000);
+    ws.onmessage=ev=>{
+      let m=null; try{ m=JSON.parse(ev.data); }catch(e){ return; }
+      if(m.type==='OPEN'){ clearTimeout(to); ws.__q=ws.__q||[]; res(ws); }
+      else if(m.type==='ID-TAKEN'){ clearTimeout(to); try{ws.close();}catch(e){} rej(new Error('taken')); }
+      else { ws.__q=ws.__q||[]; ws.__q.push(m); if(ws.__w){ const r=ws.__w; ws.__w=null; r(); } }
+    };
+    ws.onerror=()=>{ clearTimeout(to); rej(new Error('ws')); };
+    ws.onclose=()=>{ clearTimeout(to); ws.__dead=1; if(ws.__w){ const r=ws.__w; ws.__w=null; r(); } rej(new Error('closed')); };
+  });
+}
+function sigSend(ws,type,payload,dst){
+  try{ ws.send(JSON.stringify({type,payload,dst})); }catch(e){}
+}
+async function sigWait(ws,type,ms){
+  const t0=Date.now();
+  const want=Array.isArray(type)?type:[type];
+  while(true){
+    const q=ws.__q||[];
+    const i=q.findIndex(m=>want.includes(m.type));
+    if(i>=0) return q.splice(i,1)[0];
+    if(ws.__dead||ws.readyState>1) return null;
+    if(ms&&Date.now()-t0>ms) return null;
+    await new Promise(r=>{ ws.__w=r; setTimeout(()=>{ if(ws.__w===r){ws.__w=null;r();} },200); });
+  }
+}
+/* あいことばで つなぐ。asHost が true なら まつ がわ */
+async function netConnectCode(asHost,code){
+  let pc, ws;
+  try{ pc=new RTCPeerConnection(ICE); }
+  catch(e){ await say('この ブラウザでは ちょくせつたいせんが つかえない…'); return false; }
+  net={pc,dc:null,host:asHost,dead:0};
+  let openRes; const opened=new Promise(r=>{ openRes=r; });
+  const CID='mqdc';
+  try{
+    ws=await sigOpen(asHost?peerIdOf(code):rndId());
+  }catch(e){
+    netClose();
+    if(String(e.message)==='taken'){
+      await say('その あいことばは いま つかわれている。'); return 'retry';
+    }
+    sfx('no');
+    await say('まちあわせサーバーに つながらなかった…');
+    await say('でんぱの ぐあいか、サーバーが こんでいるみたい。');
+    await say('「コードを コピーして たいせん」なら サーバーなしで できるよ。');
+    return false;
+  }
+  net.ws=ws;
+  const beat=setInterval(()=>{ try{ ws.send(JSON.stringify({type:'HEARTBEAT'})); }catch(e){} },5000);
+  net.beat=beat;
+  try{
+    if(asHost){
+      /* ホストは まつ。あいてから きた OFFER に こたえる */
+      pc.ondatachannel=ev=>{ net.dc=ev.channel; netHook(net.dc);
+        net.dc.onopen=()=>openRes(true);
+        if(net.dc.readyState==='open') openRes(true); };
+      ui.text={full:'あいことば '+code+'  まっています…',n:40,done:true,name:null};
+      const off=await sigWait(ws,'OFFER',120000);   /* 2ふん まつ */
+      ui.text=null;
+      if(!off||!off.payload||!off.payload.sdp){ sfx('no'); await say('2ふん まっても だれも こなかった…'); netClose(); return false; }
+      const peer=off.src;
+      pc.onicecandidate=e=>{ if(e.candidate)
+        sigSend(ws,'CANDIDATE',{candidate:e.candidate,type:'data',connectionId:CID},peer); };
+      await pc.setRemoteDescription(off.payload.sdp);
+      await pc.setLocalDescription(await pc.createAnswer());
+      sigSend(ws,'ANSWER',{sdp:pc.localDescription,type:'data',connectionId:CID},peer);
+      /* あいての ICE を うけとりつづける */
+      (async()=>{ for(let i=0;i<60;i++){ const c=await sigWait(ws,'CANDIDATE',5000);
+        if(!c) { if(net&&net.dc&&net.dc.readyState==='open') return; continue; }
+        try{ await pc.addIceCandidate(c.payload.candidate); }catch(e){} } })();
+    } else {
+      /* さんかする がわが つなぎに いく */
+      const dc=pc.createDataChannel('mq',{ordered:true});
+      net.dc=dc; netHook(dc); dc.onopen=()=>openRes(true);
+      const peer=peerIdOf(code);
+      pc.onicecandidate=e=>{ if(e.candidate)
+        sigSend(ws,'CANDIDATE',{candidate:e.candidate,type:'data',connectionId:CID},peer); };
+      await pc.setLocalDescription(await pc.createOffer());
+      sigSend(ws,'OFFER',{sdp:pc.localDescription,type:'data',connectionId:CID,
+        label:'mq',reliable:true,serialization:'binary',browser:'mq'},peer);
+      ui.text={full:'あいことばで さがしています…',n:40,done:true,name:null};
+      /* あいてが いなければ サーバーが EXPIRE を かえす（すぐ わかる）*/
+      const ans=await sigWait(ws,['ANSWER','EXPIRE'],20000);
+      ui.text=null;
+      if(!ans||ans.type==='EXPIRE'||!ans.payload||!ans.payload.sdp){
+        sfx('no');
+        await say('その あいことばの あいてが みつからない…');
+        await say('もじが あっているか、ホストが まっているか たしかめてね。');
+        netClose(); return 'retry';
+      }
+      await pc.setRemoteDescription(ans.payload.sdp);
+      (async()=>{ for(let i=0;i<60;i++){ const c=await sigWait(ws,'CANDIDATE',5000);
+        if(!c){ if(net&&net.dc&&net.dc.readyState==='open') return; continue; }
+        try{ await pc.addIceCandidate(c.payload.candidate); }catch(e){} } })();
+    }
+  }catch(e){ sfx('no'); await say('つなぐ じゅんびに しっぱいした…'); netClose(); return false; }
+  ui.text={full:'つないでいる…',n:8,done:true,name:null};
+  const ok=await Promise.race([opened,new Promise(r=>setTimeout(()=>r(false),30000))]);
+  ui.text=null;
+  try{ clearInterval(beat); ws.close(); }catch(e){}   /* つながれば まちあわせ所は もう いらない */
+  if(!ok){
+    sfx('no'); await say('つながらなかった…');
+    await say('かいせんに よっては つながらないことが ある。');
+    await say('そのときは チームコードたいせんを つかってね!');
+    netClose(); return false;
+  }
+  sfx('heal');
+  await say('つながった!');
+  return true;
 }
 async function netConnect(asHost){
   let pc;
@@ -6842,7 +6987,7 @@ async function netBattle(asHost){
     }
   }
   for(let i=14;i>=0;i--){ bt.intro=i/14; await sleep(24); }
-  bt=null; nb=null; scene='field'; ui.text=null;
+  bt=null; nb=null; scene='field'; ui.text=null; ui.pass=null;
   bgmSync();
   if(result==='win'){ sfx('lvl'); await say('ともだちに かった!'); }
   else if(result==='lose') await say('ともだちに まけてしまった…');
@@ -6853,11 +6998,35 @@ async function netBattle(asHost){
 }
 async function netMenu(){
   while(true){
-    const c=await choose(['しょうたいする (ホスト)','しょうたいコードで さんか','もどる'],
-      {x:6,y:44,w:148,cols:1,cancel:true,title:'ちょくせつ たいせん'});
-    if(c<0||c===2) return;
+    const c=await choose(['あいことばを 出す (ホスト)','あいことばを いれて さんか',
+      'コードを コピーして たいせん','もどる'],
+      {x:5,y:40,w:150,cols:1,cancel:true,max:4,title:'ちょくせつ たいせん'});
+    if(c<0||c===3) return;
     if(!alive().length){ await say('たたかえる モンスターが いない!'); continue; }
-    if(await netConnect(c===0)){ await netBattle(c===0); return; }
+    if(c===0){                                   /* ホスト: あいことばを 出して まつ */
+      let r='retry';
+      while(r==='retry'){
+        const code=newCode();
+        await showPass(code);
+        await say('ともだちに この 5もじを おしえてね。');
+        r=await netConnectCode(true,code);
+        ui.pass=null; ui.text=null;
+      }
+      if(r===true){ await netBattle(true); return; }
+    } else if(c===1){                            /* さんか: あいことばを うつ */
+      let r='retry';
+      while(r==='retry'){
+        const code=askPass();
+        if(code.length!==5){ sfx('no'); await say('5もじで いれてね。'); break; }
+        r=await netConnectCode(false,code);
+      }
+      if(r===true){ await netBattle(false); return; }
+    } else {                                     /* これまでの やりかた */
+      const h=await choose(['しょうたいする (ホスト)','しょうたいコードで さんか','やめる'],
+        {x:6,y:44,w:148,cols:1,cancel:true,title:'コードを コピー'});
+      if(h<0||h===2) continue;
+      if(await netConnect(h===0)){ await netBattle(h===0); return; }
+    }
   }
 }
 async function commsMenu(){
@@ -8481,6 +8650,11 @@ function draw(){
   if(ui.flashScreen>0){ ui.flashScreen--; d.fillStyle='rgba(255,255,255,'+(ui.flashScreen/26)+')'; d.fillRect(0,0,disp.width,disp.height); }
   if(scene==='title') drawTitleUI();
   if(scene==='battle'&&bt&&!ui.evo) drawBattleUI();
+  if(ui.pass){
+    box(28,40,104,34);
+    T('あいことば',80,44,{size:7,align:'center',color:'#f4b942'});
+    T(ui.pass,80,52,{size:18,align:'center',color:'#ffffff',weight:600});
+  }
   if(ui.banner&&ui.banner.n>0){ ui.banner.n--;
     box(4,4,Math.max(50,tw(ui.banner.t,9)+16),18);
     T(ui.banner.t,12,9,{size:9,color:'#f4b942'}); }
