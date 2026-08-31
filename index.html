@@ -573,6 +573,7 @@ let waitA=null, scene='boot';
 function press(k){
   sfx(k==='a'?'ok':'tick');
   if(ui.text && !ui.text.done){ ui.text.n=ui.text.full.length; return; }
+  if(ui.pin){ pinKey(k); return; }
   if(ui.qty){ qtyKey(k); return; }
   if(ui.menu){ menuKey(k); return; }
   if(waitA && (k==='a'||k==='b')){ const r=waitA; waitA=null; r(); return; }
@@ -6495,12 +6496,18 @@ async function showPass(code){
   await say('あいことばは 「'+code+'」!',{keep:true});
   ui.pass=code;
 }
-/* あいことばを うちこむ。つかわない 文字は すてる */
+/* あいことばを うちこむ。▲▼で すうじ、◀▶で けた、A で けってい */
 function askPass(){
-  const raw=(window.prompt('ホストの あいことば 5もじを いれてね','')||'').toUpperCase();
-  let out='';
-  for(const ch of raw) if(CODEA.includes(ch)) out+=ch;
-  return out.slice(0,5);
+  return new Promise(r=>{ ui.pin={d:[0,0,0,0],i:0,res:r}; });
+}
+function pinKey(k){
+  const q=ui.pin;
+  if(k==='up'){ q.d[q.i]=(q.d[q.i]+1)%10; sfx('tick'); }
+  else if(k==='down'){ q.d[q.i]=(q.d[q.i]+9)%10; sfx('tick'); }
+  else if(k==='right'){ q.i=(q.i+1)%PINLEN; }
+  else if(k==='left'){ q.i=(q.i+PINLEN-1)%PINLEN; }
+  else if(k==='a'){ const r=q.res; ui.pin=null; r(q.d.join('')); }
+  else if(k==='b'||k==='start'){ const r=q.res; ui.pin=null; sfx('no'); r(null); }
 }
 
 /* ---------------- 1) チームコード対戦 ---------------- */
@@ -6602,9 +6609,10 @@ async function waitIce(pc){
    サーバー（PeerServer の おおやけの ブローカー）を つかう。
    たたかいの データは これまでどおり 端末どうし 直接 やりとりする。 */
 const SIGHOST='wss://0.peerjs.com/peerjs?key=peerjs&version=1.5.4';
-const CODEA='23456789ABCDEFGHJKLMNPQRSTUVWXYZ';   /* 0O1I は のぞく */
-const newCode=()=>{ let s=''; for(let i=0;i<5;i++) s+=CODEA[Math.floor(Math.random()*32)]; return s; };
-const peerIdOf=code=>'mqv1'+code.toUpperCase();
+const CODEA='0123456789';                          /* あいことばは 4けたの すうじ */
+const PINLEN=4;
+const newCode=()=>{ let s=''; for(let i=0;i<PINLEN;i++) s+=CODEA[Math.floor(Math.random()*10)]; return s; };
+const peerIdOf=code=>'mqn'+code;
 const rndId=()=>'mqg'+Math.random().toString(36).slice(2,10);
 
 /* まちあわせ所に つなぐ。OPEN が くるまで まつ */
@@ -6701,7 +6709,7 @@ async function netConnectCode(asHost,code){
       if(!ans||ans.type==='EXPIRE'||!ans.payload||!ans.payload.sdp){
         sfx('no');
         await say('その あいことばの あいてが みつからない…');
-        await say('もじが あっているか、ホストが まっているか たしかめてね。');
+        await say('すうじが あっているか、ホストが まっているか たしかめてね。');
         netClose(); return 'retry';
       }
       await pc.setRemoteDescription(ans.payload.sdp);
@@ -7008,7 +7016,7 @@ async function netMenu(){
       while(r==='retry'){
         const code=newCode();
         await showPass(code);
-        await say('ともだちに この 5もじを おしえてね。');
+        await say('ともだちに この 4けたを おしえてね。');
         r=await netConnectCode(true,code);
         ui.pass=null; ui.text=null;
       }
@@ -7016,8 +7024,8 @@ async function netMenu(){
     } else if(c===1){                            /* さんか: あいことばを うつ */
       let r='retry';
       while(r==='retry'){
-        const code=askPass();
-        if(code.length!==5){ sfx('no'); await say('5もじで いれてね。'); break; }
+        const code=await askPass();
+        if(!code){ break; }
         r=await netConnectCode(false,code);
       }
       if(r===true){ await netBattle(false); return; }
@@ -8498,6 +8506,25 @@ function drawTextBox(){
   for(let i=0;i<show.length;i++) T(show[i],9,y+i*12,{size:9});
   if(t.done&&Math.sin(tick/7)>0) T('▼',147,129,{size:8,color:'#f4b942'});
 }
+function drawPin(){
+  const q=ui.pin; if(!q) return;
+  box(14,38,132,62);
+  T('あいことばを いれてね',80,43,{size:8,align:'center',color:'#f4b942'});
+  const bw=22, gap=6, x0=80-(bw*PINLEN+gap*(PINLEN-1))/2;
+  for(let i=0;i<PINLEN;i++){
+    const x=x0+i*(bw+gap), on=i===q.i;
+    fill(x,55,bw,26,on?'rgba(244,185,66,.22)':'rgba(255,255,255,.06)');
+    if(on&&Math.sin(tick/7)>0){
+      T('▲',x+bw/2,50,{size:6,align:'center',color:'#f4b942'});
+      T('▼',x+bw/2,82,{size:6,align:'center',color:'#f4b942'});
+    }
+    T(String(q.d[i]),x+bw/2,59,{size:18,weight:700,align:'center',
+      color:on?'#ffffff':'#c9c5e0'});
+  }
+  box(3,112,154,18);
+  T('▲▼ すうじ   ◀▶ けた   A けってい   B やめる',80,117,
+    {size:6.5,align:'center',color:'#bdb8d6'});
+}
 function drawQty(){
   const q=ui.qty; if(!q) return;
   box(14,42,132,58);
@@ -8666,6 +8693,7 @@ function draw(){
   drawTextBox();
   drawSlot();
   drawMenu();
+  drawPin();
   drawQty();
   drawDetail();
   if(ui.fade>0){ d.fillStyle='rgba(0,0,0,'+ui.fade+')'; d.fillRect(0,0,disp.width,disp.height); }
